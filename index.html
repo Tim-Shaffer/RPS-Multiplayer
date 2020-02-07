@@ -31,17 +31,6 @@
     <div class="container">
 
         <div class="row jumbotron jumbotron-fluid mh-100" id="startup">
-        
-            <section id="existing" class="col-sm-12" >
-                    <form>
-                        <label class="radio-inline">
-                        <input type="radio" name="optradio" value="new" checked>New User
-                        </label>
-                        <label class="radio-inline">
-                        <input type="radio" name="optradio" value="existing">Existing User
-                        </label>
-                    </form>
-            </section>
 
             <section id="new-player" class="col-sm-12">
                     <form>
@@ -58,54 +47,98 @@
 
         </div>
 
-        <div class="container card grid" id="playerSection" style="display:none">
+    </div>
+
+    <div class="container card grid" id="playerSection" style="display:none">
             
-            <section class="row">
+        <section class="row">
             
-                <div class="col-sm-4 card-body" id="your-game-info">
-                
-                    <h3 id="player-name">Player Name</h3>
-                
+            <div class="col-sm-4 card" id="your-game-info">
+            
+                <h3 class="card-header" id="player-name">Player Name</h3>
+                <div class="card-body">
+                    <h5 class="card-title">Scores:</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Wins:</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Losses:</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Ties:</h6>
+                    <ul class="list-group list-group-flush" id="plyr-game-choice">
+                        <li class="list-group-item">
+                            <button type="button" class="btn btn-outline-success btn-lg btn-block" id="rock">Rock</button>
+                        </li>
+                        <li class="list-group-item">
+                            <button type="button" class="btn btn-outline-success btn-lg btn-block" id="paper">Paper</button>
+                        </li>
+                        <li class="list-group-item">
+                            <button type="button" class="btn btn-outline-success btn-lg btn-block" id="scissor">Scissor</button>
+                        </li>
+                    </ul>
+
                 </div>
-
-                <div class="col-sm-4 card-body" id="blank-space"> </div>
-                
-                <div class="col-sm-4 card-body" id="your-opponent">
-    
-                    <h3 id="Opponent-name">Opponent Name</h3></h3>
-    
-                    </div>
-    
-                </div>
-
-            </section>
-
-        </div>
-
-        <section class="jumbotron">
-            <div class="container card grid" id="messages">
-                <div class="card mb-4">
-                    <div class="card-header">Messages:</div>
-                    <div class="card-body">
-                        <div class="table-responsive-sm">
-                            <table class="table table-striped table-sm table-hover" id='msg-table'>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Tag</th>
-                                        <th scope="col">Message</th>
-                                        <th scope="col">Date/Time</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>   
+            
             </div>
+
+            <div class="col-sm-4 card" id="blank-space"> </div>
+            
+            <div class="col-sm-4 card" id="your-opponent">
+
+                <h3 class="card-header" id="opponent-name">Opponent Name</h3>
+                <div class="card-body">
+                    <h5 class="card-title">Scores:</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Wins:</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Losses:</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Ties:</h6>
+                    <ul class="list-group list-group-flush" id="opp-game-choice">
+                        <li class="list-group-item">
+                            <button type="button" class="btn btn-outline-success btn-lg btn-block" id="rock">Rock</button>
+                        </li>
+                        <li class="list-group-item">
+                            <button type="button" class="btn btn-outline-success btn-lg btn-block" id="paper">Paper</button>
+                        </li>
+                        <li class="list-group-item">
+                            <button type="button" class="btn btn-outline-success btn-lg btn-block" id="scissor">Scissor</button>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
         </section>
 
     </div>
+
+        <section class="container card grid" id="messages">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <form id="IM">
+                        <label for="button-input">Send a Message</label>
+                        <input type="text" id="button-input">
+                        <input class="btn btn-secondary" id="add-msg" type="submit" value="sendIM">
+                    </form>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive-sm">
+                        <table class="table table-striped table-sm table-hover" id='msg-table'>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tag</th>
+                                    <th scope="col">Message</th>
+                                    <th scope="col">Date/Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>   
+
+        </section>
+
+    </div>
+
+    
+
+
 
    
     <!-- Insert External Scripting -->

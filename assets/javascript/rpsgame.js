@@ -13,60 +13,34 @@ firebase.initializeApp(config);
 
 // Create a variable to reference the database
 var database = firebase.database();
-var dataRef = database.ref("/rps");
+var dataRPS = database.ref("/rps");
+var dataMSG = database.ref("/msgs");
 
 // *****
 var plyrName;
-var msg;
+var compMsg;
+var playerReady = false;
+var hasOpponent = false;
+var opponentName;
+var playerName;
+
 
 $("#sub-button").on("click", function() {
 
     event.preventDefault();
 
-    var userStatus = getRadioValue();
-    // console.log("Check for " + userStatus + " user.")
-
     plyrName = capital_letter($("#name-input").val().trim().toLowerCase());
 
-    dataRef.once('value', function(snapshot) {
-        playerExists = false;
-
-        var playerName;
-
-        snapshot.forEach(function (childSnapShot){
-            if (childSnapShot.key === plyrName) {
-                    playerExists = true;  
-            };
-            
-        });
-
-        if (userStatus === "existing"){
-            if (playerExists) {
-                console.log("Looking for Existing User and it Exists")
-                msg = "The " + plyrName + " user account was found.  New Game Play established";
-                updatePlayerName();
-                addNewMsg("BOT");
-            } else {
-                console.log("Looking for Existing User but it doesn't exist - so add it")
-                msg = "Search for an Existing User but none found."
-                addNewMsg("BOT");
-                addUser();
-                updatePlayerName();
-            }
-        } else {
-            if (playerExists) {
-                console.log("Looking for New User but it Exists")
-                msg = "Trying to add new user: " + plyrName + " but it already exists"; 
-                addNewMsg("BOT");
-                updatePlayerName(); 
-            } else {
-                console.log("Looking for New User and it doesn't exist - so add it");
-                addUser();
-                updatePlayerName();
-            }
-        };
-
+    // do we have a record in the DB yet?
+    dataRPS.once('value', function(snapshot) {
+        var exists = (snapshot.val() !== null);
+        if (exists) {
+            addOpponent();
+        } else {      
+            addUser();
+        }
     });
+
 
     // Clear Information from the form
     $("#name-input").val('');
@@ -79,6 +53,7 @@ $("#sub-button").on("click", function() {
     // show the player section
     $("#playerSection").show();
 
+    // wait for an opponent now!
 });
 
 // --------------------------------------------------------------------------------------
@@ -101,39 +76,33 @@ function capital_letter(str) {
 // end of the capital_letter() function
 // --------------------------------------------------------------------------------------
 
-// Firebase watcher + initial loader HINT: This code behaves similarly to .on("value")
-database.ref('/rps').on("child_added", function(childSnapshot) {
-    // Log everything that's coming out of snapshot
-    // console.log(childSnapshot.val().name);
-    // console.log(childSnapshot.val().gameStatus);
-    console.log(childSnapshot.key);
-    
-});
-
-function getRadioValue() {
-        var ele = $('input[name ="optradio"]'); 
-          
-        for(i = 0; i < ele.length; i++) { 
-            if(ele[i].checked) 
-            return ele[i].value; 
-        } 
-};
-
 function addUser() {
-    database.ref("/rps").child(plyrName).set({
+    dataRPS.set({
         name: plyrName,
         opponent: "",
     });
 
-    updatePlayerName();
+    // playerReady = updatePlayerName();
 
-    msg = "Added New User:  " + plyrName;
-    addNewMsg("BOT"); 
+    compMsg = "Added New User:  " + plyrName;
+    addNewMsg("BOT", compMsg); 
 };
 
-function addNewMsg(tag) {
+function addOpponent() {
+    dataRPS.update({
+        opponent: plyrName,
+    });   
+
+    // hasOpponent = updateOpponentName(plyrName);
+
+    compMsg = "Added New User:  " + plyrName;
+    addNewMsg("BOT", compMsg); 
+
+}
+
+function addNewMsg(tag, msg) {
     // $("#msg-text").append('<p>' + tag + ':  ' + msg + '</p>')
-    database.ref("/msgs").push({
+    dataMSG.push({
         userName: tag,
         message: msg,
         dateAdded: firebase.database.ServerValue.TIMESTAMP,
@@ -141,17 +110,25 @@ function addNewMsg(tag) {
 
 };
 
-function updatePlayerName() {
+function updatePlayerName(name) {
     //  update the player section
-    $("#player-name").text(plyrName);
+    $("#player-name").text(name);
+    return name;
+};
+
+function updateOpponentName(name) {
+    //  update the player section
+    $("#opponent-name").text(name);
+    return name;
+
 };
 
 // Firebase watcher + initial loader 
-database.ref('/msgs').orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
+dataMSG.orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
     // console.log("At least hitting the message portion!");
 
         var tag =  childSnapshot.val().userName;
-        var msg =  childSnapshot.val().message;
+        var message =  childSnapshot.val().message;
         var dtTm = childSnapshot.val().dateAdded;
 
         var unixFormat = "x";
@@ -160,7 +137,7 @@ database.ref('/msgs').orderByKey().limitToLast(10).on("child_added", function(ch
         // Create the new row
         var newRow = $("<tr>").append(
             $("<td>").text(tag),
-            $("<td>").text(msg),
+            $("<td>").text(message),
             $("<td>").text(convertedDate.format("MM/DD/YY hh:mm:ss")),
             );
 
@@ -171,4 +148,47 @@ database.ref('/msgs').orderByKey().limitToLast(10).on("child_added", function(ch
     function(errorObject) {
     console.log("Errors handled: " + errorObject.code);
 });
+
+// --------------------------------------------------------------------------------------
+// This function handles events where the "add-msg" button is clicked  (from Class Activities 07-MovieButtonLayout)
+// --------------------------------------------------------------------------------------
+$("#add-msg").on("click", function(event) {
+    // event.preventDefault() prevents the form from trying to submit itself.
+    // using a form so that the user can hit enter instead of clicking the button if they want
+    event.preventDefault();
+
+    // This line will grab the text from the input box and trim the spaces
+    var instantMessage = $("#button-input").val().trim();
+
+    // after grabbing the information, remove it from the page 
+    $("#button-input").val("");
+
+    // can only IM if the player is signed in and ready
+    if (playerReady) {
+        addNewMsg(plyrName, instantMessage); 
+    }
+
+});
+// --------------------------------------------------------------------------------------
+// end of function triggered with the add button
+// --------------------------------------------------------------------------------------
+
+dataRPS.on("value", function(snapshot) {
+    var exists = (snapshot.val() !== null);
+    if (exists) {
+        playerName = updatePlayerName(snapshot.val().name);
+        opponentName = updateOpponentName(snapshot.val().opponent); 
+    };
+
+    if (plyrName === playerName) {
+        $("#opp-game-choice").hide();
+        $("#plyr-game-choice").show();
+    }
+    else if (plyrName === opponentName) {
+        $("#plyr-game-choice").hide();
+        $("#opp-game-choice").show();
+    }
+
+});
+
 
