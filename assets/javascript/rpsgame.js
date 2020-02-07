@@ -35,9 +35,18 @@ $("#sub-button").on("click", function() {
     dataRPS.once('value', function(snapshot) {
         var exists = (snapshot.val() !== null);
         if (exists) {
-            addOpponent();
+            if (snapshot.val().opponent === "") {
+             addOpponent();
+             playerReady = true;
+            } else {
+                // add bot message that game is full 
+                compMsg = "Game is Full";
+                addNewMsg("BOT", compMsg);
+                playerReady = true; 
+            }
         } else {      
             addUser();
+            playerReady = true;
         }
     });
 
@@ -82,9 +91,7 @@ function addUser() {
         opponent: "",
     });
 
-    // playerReady = updatePlayerName();
-
-    compMsg = "Added New User:  " + plyrName;
+    compMsg = "Added Player:  " + plyrName;
     addNewMsg("BOT", compMsg); 
 };
 
@@ -93,9 +100,7 @@ function addOpponent() {
         opponent: plyrName,
     });   
 
-    // hasOpponent = updateOpponentName(plyrName);
-
-    compMsg = "Added New User:  " + plyrName;
+    compMsg = "Added Opponent:  " + plyrName;
     addNewMsg("BOT", compMsg); 
 
 }
@@ -187,8 +192,10 @@ dataRPS.on("value", function(snapshot) {
     else if (plyrName === opponentName) {
         $("#plyr-game-choice").hide();
         $("#opp-game-choice").show();
+    } else {
+        $("#plyr-game-choice").hide();
+        $("#opp-game-choice").hide();
     }
-
 });
 
 
