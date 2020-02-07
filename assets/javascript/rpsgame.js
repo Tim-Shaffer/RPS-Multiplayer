@@ -13,31 +13,57 @@ firebase.initializeApp(config);
 
 // Create a variable to reference the database
 var database = firebase.database();
+var dataRef = database.ref("/rps");
+
+// *****
+var plyrName;
+var msg;
 
 $("#sub-button").on("click", function() {
 
     event.preventDefault();
 
-    var plyrName = capital_letter($("#name-input").val().trim().toLowerCase());
+    var userStatus = getRadioValue();
+    // console.log("Check for " + userStatus + " user.")
 
+    plyrName = capital_letter($("#name-input").val().trim().toLowerCase());
 
-    database.ref("/rps").once('value', function(snapshot) {
-        // if exists, get information 
-        var playerExists = false;
+    dataRef.once('value', function(snapshot) {
+        playerExists = false;
+
+        var playerName;
+
         snapshot.forEach(function (childSnapShot){
-            var playerName = (childSnapShot.val() && childSnapShot.val().name) || 'Anonymous' 
-            if (playerName === plyrName) {
-                playerExists = true;    
-            }
+            if (childSnapShot.key === plyrName) {
+                    playerExists = true;  
+            };
+            
         });
 
-        if (!playerExists) {
-        // create a new entry
-
-            database.ref("/rps").push({
-                name: plyrName,
-                gameStatus: "waiting",
-            });
+        if (userStatus === "existing"){
+            if (playerExists) {
+                console.log("Looking for Existing User and it Exists")
+                msg = "The " + plyrName + " user account was found.  New Game Play established";
+                updatePlayerName();
+                addNewMsg("BOT");
+            } else {
+                console.log("Looking for Existing User but it doesn't exist - so add it")
+                msg = "Search for an Existing User but none found."
+                addNewMsg("BOT");
+                addUser();
+                updatePlayerName();
+            }
+        } else {
+            if (playerExists) {
+                console.log("Looking for New User but it Exists")
+                msg = "Trying to add new user: " + plyrName + " but it already exists"; 
+                addNewMsg("BOT");
+                updatePlayerName(); 
+            } else {
+                console.log("Looking for New User and it doesn't exist - so add it");
+                addUser();
+                updatePlayerName();
+            }
         };
 
     });
@@ -45,8 +71,11 @@ $("#sub-button").on("click", function() {
     // Clear Information from the form
     $("#name-input").val('');
 
-    // hide the Form
+    // hide the new-player input
     $("#new-player").hide();
+
+    // hide the radio buttons
+    $("#existing").hide();
 
 });
 
@@ -70,4 +99,42 @@ function capital_letter(str) {
 // end of the capital_letter() function
 // --------------------------------------------------------------------------------------
 
+// Firebase watcher + initial loader HINT: This code behaves similarly to .on("value")
+database.ref('/rps').on("child_added", function(childSnapshot) {
+    // Log everything that's coming out of snapshot
+    // console.log(childSnapshot.val().name);
+    // console.log(childSnapshot.val().gameStatus);
+    console.log(childSnapshot.key);
+    
+});
+
+function getRadioValue() {
+        var ele = $('input[name ="optradio"]'); 
+          
+        for(i = 0; i < ele.length; i++) { 
+            if(ele[i].checked) 
+            return ele[i].value; 
+        } 
+};
+
+function addUser() {
+    database.ref("/rps").child(plyrName).set({
+        name: plyrName,
+        opponent: "",
+    });
+
+    updatePlayerName();
+
+    msg = "Added New User:  " + plyrName;
+    addNewMsg("BOT"); 
+};
+
+function addNewMsg(tag) {
+    $("#msg-text").append('<p>' + tag + ':  ' + msg + '</p>')
+};
+
+function updatePlayerName() {
+    //  update the player section
+    $("#player-name").text(plyrName);
+}
 

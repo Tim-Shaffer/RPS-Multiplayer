@@ -29,22 +29,51 @@
 <body>
 
     <div class="container">
-        <form id="new-player">
-            
-            <div class="form-group">
-              <label for="Name">Enter a User Name for the Game</label>
-              <input type="text" class="form-control" id="name-input">
-            </div>
+        
+        <section id="existing">
+            <form>
+                <label class="radio-inline">
+                  <input type="radio" name="optradio" value="new" checked>New User
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" name="optradio" value="existing">Existing User
+                </label>
+              </form>
+        </section>
 
-            <button type="submit" class="btn btn-primary" id="sub-button">Submit</button>
-          
-        </form>
-    
+        </section>
+        <section id="new-player">
+            <form >
+                
+                <div class="form-group">
+                <label for="Name">Enter a User Name</label>
+                <input type="text" class="form-control" id="name-input">
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="sub-button">Submit</button>
+            
+            </form>
+        </section>
+
+        <section id="playerSection">
+            <div>
+                <h1 id="player-name">Player Name</h1>
+            </div>
+        </section>
+
+        <section id="messages" class="jumbotron">
+            <div id="msg-text">
+               
+            </div>
+        </section>
     </div>
 
    
     <!-- Insert External Scripting -->
     <script type="text/javascript" src="./assets/javascript/rpsgame.js"></script>
+
+    <!-- for javascript -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> -->
 
 </body>
 
