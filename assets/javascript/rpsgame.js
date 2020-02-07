@@ -71,11 +71,13 @@ $("#sub-button").on("click", function() {
     // Clear Information from the form
     $("#name-input").val('');
 
-    // hide the new-player input
-    $("#new-player").hide();
+    // hide the startup inputs
+    $("#startup").hide();
+    // $("#new-player").hide();
+    // $("#existing").hide();
 
-    // hide the radio buttons
-    $("#existing").hide();
+    // show the player section
+    $("#playerSection").show();
 
 });
 
@@ -130,11 +132,43 @@ function addUser() {
 };
 
 function addNewMsg(tag) {
-    $("#msg-text").append('<p>' + tag + ':  ' + msg + '</p>')
+    // $("#msg-text").append('<p>' + tag + ':  ' + msg + '</p>')
+    database.ref("/msgs").push({
+        userName: tag,
+        message: msg,
+        dateAdded: firebase.database.ServerValue.TIMESTAMP,
+    });
+
 };
 
 function updatePlayerName() {
     //  update the player section
     $("#player-name").text(plyrName);
-}
+};
+
+// Firebase watcher + initial loader 
+database.ref('/msgs').orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
+    // console.log("At least hitting the message portion!");
+
+        var tag =  childSnapshot.val().userName;
+        var msg =  childSnapshot.val().message;
+        var dtTm = childSnapshot.val().dateAdded;
+
+        var unixFormat = "x";
+        var convertedDate = moment(dtTm, unixFormat);
+        
+        // Create the new row
+        var newRow = $("<tr>").append(
+            $("<td>").text(tag),
+            $("<td>").text(msg),
+            $("<td>").text(convertedDate.format("MM/DD/YY hh:mm:ss")),
+            );
+
+            // Append the new row to the table
+            $("#msg-table > tbody").append(newRow);
+    
+},// Handle the errors
+    function(errorObject) {
+    console.log("Errors handled: " + errorObject.code);
+});
 
