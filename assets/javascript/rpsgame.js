@@ -21,11 +21,14 @@ var plyrName;
 var compMsg;
 var playerReady = false;
 var hasOpponent = false;
-var opponentName;
-var playerName;
-var playHand, oppHand;
 
+//  global variables for player information
+var play1Name, play2Name;
+var play1Hand, play2Hand;
+var isPlay1 = false;
+var isPlay2 = false;
 
+// --------------------------------------------------------------------------------------
 $("#sub-button").on("click", function() {
 
     event.preventDefault();
@@ -64,6 +67,7 @@ $("#sub-button").on("click", function() {
 
     // wait for an opponent now!
 });
+// --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
 // function to capitalize the text before saving it.
@@ -139,32 +143,152 @@ function updateOpponentName(name) {
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
-// Firebase watcher + initial loader 
-dataMSG.orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
-    // console.log("At least hitting the message portion!");
+//  This function handles events where the "hand" class is clicked  
+// --------------------------------------------------------------------------------------
+$('.list-group-item').on('click', '.hand', function () { 
 
-        var tag =  childSnapshot.val().userName;
-        var message =  childSnapshot.val().message;
-        var dtTm = childSnapshot.val().dateAdded;
+    // establish a local variable to contain the selected hand 
+    var hand;
 
-        var unixFormat = "x";
-        var convertedDate = moment(dtTm, unixFormat);
-        
-        // Create the new row
-        var newRow = $("<tr>").append(
-            $("<td>").text(tag),
-            $("<td>").text(message),
-            $("<td>").text(convertedDate.format("MM/DD/YY hh:mm:ss")),
-            );
+    // update the hand to the option selected
+    if ($(this).hasClass('player')) {
 
-            // Append the new row to the table
-            $("#msg-table > tbody").append(newRow);
+        // play1 selection
+        if ($(this).attr('id') === 'rock') {
+            hand = 'r';
+        }
+        else if ($(this).attr('id') === 'paper') {
+            hand = 'p';
+        } 
+        else if ($(this).attr('id') === 'scissor') {
+            hand = 's';
+        };
+
+        // update DB with playerHand 
+        dataRPS.update({
+            playerHand: hand,
+        });
+
+        // hide the section because a choice was already made and processed
+        $("#plyr-game-choice").hide();
+
+    }
+    else if ($(this).hasClass('opponent')) {
+
+        // play2 selection
+        if ($(this).attr('id') === 'rock') {
+            hand = 'r';
+        }
+        else if ($(this).attr('id') === 'paper') {
+            hand = 'p';
+        } 
+        else if ($(this).attr('id') === 'scissor') {
+            hand = 's';
+        };
+        // update DB with oppHand
+        dataRPS.update({
+            oppHand: hand,
+        });
+
+        // hide the section because a choice was already made and processed
+        $("#opp-game-choice").hide();
+    };    
     
-},// Handle the errors
-    function(errorObject) {
-    console.log("Errors handled: " + errorObject.code);
 });
 // --------------------------------------------------------------------------------------
+// end of function triggered with the click of the .hand class
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+//  firebase event listener to be triggerred on the 'value' updates of the /rps folder
+// --------------------------------------------------------------------------------------
+dataRPS.on("value", function(snapshot) {
+
+    // verify that there is an actual snapshot to be able to get values from
+    var exists = (snapshot.val() !== null);
+
+    // if there is a snapshot, update the screen and variables with the information
+    if (exists) {
+        play1Name = updatePlayerName(snapshot.val().name);
+        play2Name = updateOpponentName(snapshot.val().opponent); 
+    };
+
+    // Check which player this device is associated to 
+    if (plyrName === play1Name) {
+        
+        // hide the opponent section of choices
+        $("#opp-game-choice").hide();
+        // show the player section of choices
+        $("#plyr-game-choice").show();
+        // set booleans for the players
+        isPlay1 = true;
+        isPlay2 = false;
+
+    } 
+    // player 2 or the opponent
+    else if (plyrName === play2Name) {
+        
+        // hide the player section of choices
+        $("#plyr-game-choice").hide();
+        // show the opponent section of choices
+        $("#opp-game-choice").show();
+        // set booleans for the players
+        isPlay2 = true;
+        isPlay1 = false;
+
+
+    } 
+    // this session is just a bystander 
+    else {
+        
+        // hide the player section of choices
+        $("#plyr-game-choice").hide();
+        // hide the opponent section of choices
+        $("#opp-game-choice").hide();
+        // set booleans for the players
+        isPlay1 = false;
+        isPlay2 = false;
+
+    };
+     
+});
+// --------------------------------------------------------------------------------------
+//  end of firebase event listener
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+//  firebase event listener to be triggerred on the 'child_added' updates of the /rps folder
+// --------------------------------------------------------------------------------------
+dataRPS.on("child_added", function(snapshot) {
+    
+    console.log("child_added activated");
+    // console.log(snapshot);
+    // determine which child was added to proceed
+    if (snapshot.key === 'playerHand') {
+        // update for player one selection
+        play1Hand = snapshot.val();
+    }
+    else if (snapshot.key === 'oppHand') {
+        // update for opponent/player two selection 
+        play2Hand = snapshot.val();
+    };
+
+    // decide the game when both players have selected their hands
+    if (play1Hand && play2Hand) {
+        // game played
+        console.log("A game has been played!");
+        // function to determine the winner
+        // add a new game button for either user to click 
+        // then show\hide sections accordingly
+        // update DB with just name and opponent
+    };
+
+});
+// --------------------------------------------------------------------------------------
+//  end of firebase event listener
+// --------------------------------------------------------------------------------------
+
+//  Instant Message functionality below here: 
 
 // --------------------------------------------------------------------------------------
 // This function handles events where the "add-msg" button is clicked  
@@ -191,94 +315,30 @@ $("#add-msg").on("click", function(event) {
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
-dataRPS.on("value", function(snapshot) {
-    var exists = (snapshot.val() !== null);
-    if (exists) {
-        playerName = updatePlayerName(snapshot.val().name);
-        opponentName = updateOpponentName(snapshot.val().opponent); 
-    };
+// Firebase watcher + initial loader 
+dataMSG.orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
+    // console.log("At least hitting the message portion!");
 
-    if (plyrName === playerName) {
-        $("#opp-game-choice").hide();
-        $("#plyr-game-choice").show();
-    }
-    else if (plyrName === opponentName) {
-        $("#plyr-game-choice").hide();
-        $("#opp-game-choice").show();
-    } else {
-        $("#plyr-game-choice").hide();
-        $("#opp-game-choice").hide();
-    }
-     
-});
-// --------------------------------------------------------------------------------------
+        var tag =  childSnapshot.val().userName;
+        var message =  childSnapshot.val().message;
+        var dtTm = childSnapshot.val().dateAdded;
 
-// --------------------------------------------------------------------------------------
-$('.list-group-item').on('click', '.hand', function () { 
+        var unixFormat = "x";
+        var convertedDate = moment(dtTm, unixFormat);
+        
+        // Create the new row
+        var newRow = $("<tr>").append(
+            $("<td>").text(tag),
+            $("<td>").text(message),
+            $("<td>").text(convertedDate.format("MM/DD/YY hh:mm:ss")),
+            );
 
-    var hand;
-    if ($(this).hasClass('player')) {
-        if ($(this).attr('id') === 'rock') {
-            console.log("Rock was Chosen");
-            hand = 'r';
-        }
-        else if ($(this).attr('id') === 'paper') {
-            console.log("Paper was Chosen");
-            hand = 'p';
-        } 
-        else if ($(this).attr('id') === 'scissor') {
-            console.log("Scissor was Chosen");
-            hand = 's';
-        };
-        // update DB with playerHand 
-        dataRPS.update({
-            playerHand: hand,
-        });
-        $("#plyr-game-choice").hide();
-    }
-    else if ($(this).hasClass('opponent')) {
-        if ($(this).attr('id') === 'rock') {
-            console.log("Rock was Chosen");
-            hand = 'r';
-        }
-        else if ($(this).attr('id') === 'paper') {
-            console.log("Paper was Chosen");
-            hand = 'p';
-        } 
-        else if ($(this).attr('id') === 'scissor') {
-            console.log("Scissor was Chosen");
-            hand = 's';
-        };
-        // update DB with oppHand
-        dataRPS.update({
-            oppHand: hand,
-        });
-        $("#opp-game-choice").hide();
-    };
+            // Append the new row to the table
+            $("#msg-table > tbody").append(newRow);
     
-
-});
-// --------------------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------------------
-dataRPS.on("child_added", function(snapshot) {
-    console.log("child_added activated");
-    // console.log(snapshot);
-    if (snapshot.key === 'playerHand') {
-        playHand = snapshot.val();
-    }
-    else if (snapshot.key === 'oppHand') { 
-        oppHand = snapshot.val();
-    }
-
-    if (playHand && oppHand) {
-        // game played
-        console.log("A game has been played!");
-        // function to determine the winner
-        // add a new game button for either user to click 
-        // then show\hide sections accordingly
-        // update DB with just name and opponent
-    }
+},// Handle the errors
+    function(errorObject) {
+    console.log("Errors handled: " + errorObject.code);
 });
 // --------------------------------------------------------------------------------------
 
