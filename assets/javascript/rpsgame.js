@@ -23,6 +23,7 @@ var playerReady = false;
 var hasOpponent = false;
 var opponentName;
 var playerName;
+var playHand, oppHand;
 
 
 $("#sub-button").on("click", function() {
@@ -40,7 +41,7 @@ $("#sub-button").on("click", function() {
              playerReady = true;
             } else {
                 // add bot message that game is full 
-                compMsg = "Game is Full";
+                compMsg = "Game is Full "  + plyrName + ". But you can still chat!";
                 addNewMsg("BOT", compMsg);
                 playerReady = true; 
             }
@@ -49,7 +50,6 @@ $("#sub-button").on("click", function() {
             playerReady = true;
         }
     });
-
 
     // Clear Information from the form
     $("#name-input").val('');
@@ -66,7 +66,7 @@ $("#sub-button").on("click", function() {
 });
 
 // --------------------------------------------------------------------------------------
-// function to capitalize the text before putting it into the array
+// function to capitalize the text before saving it.
 // Found this function on W3 schools - https://www.w3resource.com/javascript-exercises/javascript-basic-exercise-50.php
 // --------------------------------------------------------------------------------------
 function capital_letter(str) {
@@ -85,6 +85,7 @@ function capital_letter(str) {
 // end of the capital_letter() function
 // --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
 function addUser() {
     dataRPS.set({
         name: plyrName,
@@ -94,7 +95,9 @@ function addUser() {
     compMsg = "Added Player:  " + plyrName;
     addNewMsg("BOT", compMsg); 
 };
+// --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
 function addOpponent() {
     dataRPS.update({
         opponent: plyrName,
@@ -103,8 +106,10 @@ function addOpponent() {
     compMsg = "Added Opponent:  " + plyrName;
     addNewMsg("BOT", compMsg); 
 
-}
+};
+// --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
 function addNewMsg(tag, msg) {
     // $("#msg-text").append('<p>' + tag + ':  ' + msg + '</p>')
     dataMSG.push({
@@ -114,20 +119,26 @@ function addNewMsg(tag, msg) {
     });
 
 };
+// --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
 function updatePlayerName(name) {
     //  update the player section
     $("#player-name").text(name);
     return name;
 };
+// --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
 function updateOpponentName(name) {
     //  update the player section
     $("#opponent-name").text(name);
     return name;
 
 };
+// --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
 // Firebase watcher + initial loader 
 dataMSG.orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
     // console.log("At least hitting the message portion!");
@@ -153,9 +164,10 @@ dataMSG.orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
     function(errorObject) {
     console.log("Errors handled: " + errorObject.code);
 });
+// --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
-// This function handles events where the "add-msg" button is clicked  (from Class Activities 07-MovieButtonLayout)
+// This function handles events where the "add-msg" button is clicked  
 // --------------------------------------------------------------------------------------
 $("#add-msg").on("click", function(event) {
     // event.preventDefault() prevents the form from trying to submit itself.
@@ -178,6 +190,7 @@ $("#add-msg").on("click", function(event) {
 // end of function triggered with the add button
 // --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
 dataRPS.on("value", function(snapshot) {
     var exists = (snapshot.val() !== null);
     if (exists) {
@@ -196,6 +209,77 @@ dataRPS.on("value", function(snapshot) {
         $("#plyr-game-choice").hide();
         $("#opp-game-choice").hide();
     }
+     
 });
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+$('.list-group-item').on('click', '.hand', function () { 
+
+    var hand;
+    if ($(this).hasClass('player')) {
+        if ($(this).attr('id') === 'rock') {
+            console.log("Rock was Chosen");
+            hand = 'r';
+        }
+        else if ($(this).attr('id') === 'paper') {
+            console.log("Paper was Chosen");
+            hand = 'p';
+        } 
+        else if ($(this).attr('id') === 'scissor') {
+            console.log("Scissor was Chosen");
+            hand = 's';
+        };
+        // update DB with playerHand 
+        dataRPS.update({
+            playerHand: hand,
+        });
+        $("#plyr-game-choice").hide();
+    }
+    else if ($(this).hasClass('opponent')) {
+        if ($(this).attr('id') === 'rock') {
+            console.log("Rock was Chosen");
+            hand = 'r';
+        }
+        else if ($(this).attr('id') === 'paper') {
+            console.log("Paper was Chosen");
+            hand = 'p';
+        } 
+        else if ($(this).attr('id') === 'scissor') {
+            console.log("Scissor was Chosen");
+            hand = 's';
+        };
+        // update DB with oppHand
+        dataRPS.update({
+            oppHand: hand,
+        });
+        $("#opp-game-choice").hide();
+    };
+    
+
+});
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+dataRPS.on("child_added", function(snapshot) {
+    console.log("child_added activated");
+    // console.log(snapshot);
+    if (snapshot.key === 'playerHand') {
+        playHand = snapshot.val();
+    }
+    else if (snapshot.key === 'oppHand') { 
+        oppHand = snapshot.val();
+    }
+
+    if (playHand && oppHand) {
+        // game played
+        console.log("A game has been played!");
+        // function to determine the winner
+        // add a new game button for either user to click 
+        // then show\hide sections accordingly
+        // update DB with just name and opponent
+    }
+});
+// --------------------------------------------------------------------------------------
 
 
