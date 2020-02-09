@@ -20,7 +20,6 @@ var dataMSG = database.ref("/msgs");
 var plyrName;
 var compMsg;
 var playerReady = false;
-var hasOpponent = false;
 
 //  global variables for player information
 var play1Name, play2Name;
@@ -39,8 +38,8 @@ $("#sub-button").on("click", function() {
     dataRPS.once('value', function(snapshot) {
         var exists = (snapshot.val() !== null);
         if (exists) {
-            if (snapshot.val().opponent === "") {
-             addOpponent();
+            if (snapshot.val().play2Name === "") {
+             addPlay2();
              playerReady = true;
             } else {
                 // add bot message that game is full 
@@ -65,7 +64,7 @@ $("#sub-button").on("click", function() {
     // show the player section
     $("#playerSection").show();
 
-    // wait for an opponent now!
+    // wait for an Play2 now!
 });
 // --------------------------------------------------------------------------------------
 
@@ -92,22 +91,22 @@ function capital_letter(str) {
 // --------------------------------------------------------------------------------------
 function addUser() {
     dataRPS.set({
-        name: plyrName,
-        opponent: "",
+        play1Name: plyrName,
+        play2Name: "",
     });
 
-    compMsg = "Added Player:  " + plyrName;
+    compMsg = "Added Player 1:  " + plyrName;
     addNewMsg("BOT", compMsg); 
 };
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
-function addOpponent() {
+function addPlay2() {
     dataRPS.update({
-        opponent: plyrName,
+        play2Name: plyrName,
     });   
 
-    compMsg = "Added Opponent:  " + plyrName;
+    compMsg = "Added Player 2:  " + plyrName;
     addNewMsg("BOT", compMsg); 
 
 };
@@ -126,20 +125,28 @@ function addNewMsg(tag, msg) {
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
-function updatePlayerName(name) {
+//  function to display the name of player 1
+// --------------------------------------------------------------------------------------
+function updatePlay1Name(name) {
     //  update the player section
-    $("#player-name").text(name);
+    $("#play1-name").text(name);
     return name;
 };
 // --------------------------------------------------------------------------------------
+//  end of updatePlay1Name() function
+// --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
-function updateOpponentName(name) {
+//  function to display the name of player 2
+// --------------------------------------------------------------------------------------
+function updatePlay2Name(name) {
     //  update the player section
-    $("#opponent-name").text(name);
+    $("#play2-name").text(name);
     return name;
 
 };
+// --------------------------------------------------------------------------------------
+//  end of updatePlay2Name() function
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
@@ -151,7 +158,7 @@ $('.list-group-item').on('click', '.hand', function () {
     var hand;
 
     // update the hand to the option selected
-    if ($(this).hasClass('player')) {
+    if ($(this).hasClass('play1')) {
 
         // play1 selection
         if ($(this).attr('id') === 'rock') {
@@ -164,16 +171,16 @@ $('.list-group-item').on('click', '.hand', function () {
             hand = 's';
         };
 
-        // update DB with playerHand 
+        // update DB with play1Hand 
         dataRPS.update({
-            playerHand: hand,
+            play1Hand: hand,
         });
 
         // hide the section because a choice was already made and processed
         $("#plyr-game-choice").hide();
 
     }
-    else if ($(this).hasClass('opponent')) {
+    else if ($(this).hasClass('play2')) {
 
         // play2 selection
         if ($(this).attr('id') === 'rock') {
@@ -209,29 +216,29 @@ dataRPS.on("value", function(snapshot) {
 
     // if there is a snapshot, update the screen and variables with the information
     if (exists) {
-        play1Name = updatePlayerName(snapshot.val().name);
-        play2Name = updateOpponentName(snapshot.val().opponent); 
+        play1Name = updatePlay1Name(snapshot.val().play1Name);
+        play2Name = updatePlay2Name(snapshot.val().play2Name); 
     };
 
     // Check which player this device is associated to 
     if (plyrName === play1Name) {
         
-        // hide the opponent section of choices
-        $("#opp-game-choice").hide();
-        // show the player section of choices
-        $("#plyr-game-choice").show();
+        // hide the play2 section of choices
+        $("#play2-game-choice").hide();
+        // show the play1 section of choices
+        $("#play1-game-choice").show();
         // set booleans for the players
         isPlay1 = true;
         isPlay2 = false;
 
     } 
-    // player 2 or the opponent
+    // player 2 
     else if (plyrName === play2Name) {
         
-        // hide the player section of choices
-        $("#plyr-game-choice").hide();
-        // show the opponent section of choices
-        $("#opp-game-choice").show();
+        // hide the play1 section of choices
+        $("#play1-game-choice").hide();
+        // show the play2 section of choices
+        $("#play2-game-choice").show();
         // set booleans for the players
         isPlay2 = true;
         isPlay1 = false;
@@ -241,10 +248,10 @@ dataRPS.on("value", function(snapshot) {
     // this session is just a bystander 
     else {
         
-        // hide the player section of choices
-        $("#plyr-game-choice").hide();
-        // hide the opponent section of choices
-        $("#opp-game-choice").hide();
+        // hide the play1 section of choices
+        $("#play1-game-choice").hide();
+        // hide the play2 section of choices
+        $("#play2-game-choice").hide();
         // set booleans for the players
         isPlay1 = false;
         isPlay2 = false;
@@ -264,12 +271,12 @@ dataRPS.on("child_added", function(snapshot) {
     console.log("child_added activated");
     // console.log(snapshot);
     // determine which child was added to proceed
-    if (snapshot.key === 'playerHand') {
+    if (snapshot.key === 'play1Hand') {
         // update for player one selection
         play1Hand = snapshot.val();
     }
-    else if (snapshot.key === 'oppHand') {
-        // update for opponent/player two selection 
+    else if (snapshot.key === 'play2Hand') {
+        // update for player two selection 
         play2Hand = snapshot.val();
     };
 
@@ -280,7 +287,7 @@ dataRPS.on("child_added", function(snapshot) {
         // function to determine the winner
         // add a new game button for either user to click 
         // then show\hide sections accordingly
-        // update DB with just name and opponent
+        // update DB with just name and play2
     };
 
 });
@@ -315,18 +322,20 @@ $("#add-msg").on("click", function(event) {
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
-// Firebase watcher + initial loader 
+//  firebase event listener to grab the last 10 messages when a child message is added
+// --------------------------------------------------------------------------------------
 dataMSG.orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
-    // console.log("At least hitting the message portion!");
 
+        // local variables to hold database values to display
         var tag =  childSnapshot.val().userName;
         var message =  childSnapshot.val().message;
         var dtTm = childSnapshot.val().dateAdded;
 
+        // variables to convert the date into a more readable format
         var unixFormat = "x";
         var convertedDate = moment(dtTm, unixFormat);
         
-        // Create the new row
+        // Create the new row of messages to display
         var newRow = $("<tr>").append(
             $("<td>").text(tag),
             $("<td>").text(message),
@@ -336,10 +345,14 @@ dataMSG.orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
             // Append the new row to the table
             $("#msg-table > tbody").append(newRow);
     
-},// Handle the errors
+},
+// Handle the errors
     function(errorObject) {
     console.log("Errors handled: " + errorObject.code);
+
 });
+// --------------------------------------------------------------------------------------
+//  end of firebase event listener
 // --------------------------------------------------------------------------------------
 
 
