@@ -195,6 +195,7 @@ $("#rematch").on("click", function() {
 //  firebase event listener to be triggerred on the 'value' updates of the /rps folder
 // --------------------------------------------------------------------------------------
 dataRPS.on("value", function(snapshot) {
+    console.log("Executing based on the VALUE listener")
 
     // verify that there is an actual snapshot to be able to get values from
     var exists = (snapshot.val() !== null);
@@ -247,7 +248,7 @@ dataRPS.on("value", function(snapshot) {
     } 
     // this session is just a bystander 
     else {
-        
+
         // hide the play1 section of choices
         $("#play1-game-choice").hide();
 
@@ -300,6 +301,7 @@ dataRPS.on("value", function(snapshot) {
 //  firebase event listener to be triggerred on the 'child_added' updates of the /rps folder
 // --------------------------------------------------------------------------------------
 dataRPS.on("child_added", function(snapshot) {
+    console.log("Executing based on the CHILD_ADDED listener")
 
     // determine which child was added to proceed
     if (snapshot.key === 'play1Hand') {
@@ -670,8 +672,10 @@ function playGame() {
         }
     };
 
-    // show the button to allow a rematch to be requested.
-    $("#rematch").show();
+    if (plyrName === play1Name || plyrName === play2Name) {
+        // show the button to allow a rematch to be requested.
+        $("#rematch").show();
+    };
 
     // show the current results
     $("#story-line").show();

@@ -37,7 +37,7 @@ Multiplayer **Rock** - **Paper** - **Scissors** Game
 
         ![Image of Player 1 Select Page Screenshot](/assets/images/Player1_Select_Screen.jpg)
 
-        ![Image of Player 2 Waiting to Select Page Screenshot](/assets/images/Player2_Waiting_to_Select_Screen.jpg)
+        ![Image of Player 2 Waiting to Select Page Screenshot](/assets/images/Player2_Waiting-to-Select_Screen.jpg)
 
     1. When both players have made a selection, a Winner and Loser are determined.
         1. Rock smashes Scissors
