@@ -53,9 +53,9 @@ function checkTimeStamp(snap) {
         var cnvtCurrDT = moment(currDT, unixFormat);
         // console.log("current timestamp:  " + cnvtCurrDT.format("MM/DD/YY hh:mm:ss"));
     
-        console.log('Difference is ', cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes');
+        // console.log('Difference is ', cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes');
         // testing for greater than 1 but will make it greater than 5 when it works
-        if (parseInt(cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes') >  1) {
+        if (parseInt(cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes') >  5) {
             // clear entries to start a new game
             dataRPS.child("play1Name").remove();
             dataRPS.child("play2Name").remove();
@@ -65,6 +65,9 @@ function checkTimeStamp(snap) {
             dataRPS.child("loss").remove();
             tie = 0;
             dataRPS.child("tie").remove();
+            dataRPS.child("play1Hand").remove();
+            dataRPS.child("play2Hand").remove();
+            dataRPS.child("rematchSelected").remove();
 
             return false;
         }
