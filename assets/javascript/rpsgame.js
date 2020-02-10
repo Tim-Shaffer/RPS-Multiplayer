@@ -36,6 +36,8 @@ var win = 0;
 var loss = 0;
 var tie = 0;
 
+// **************************************************************************************
+//  Game Play Event Listeners
 // --------------------------------------------------------------------------------------
 //  event listener for the submit button to add a new player to the current game
 // --------------------------------------------------------------------------------------
@@ -96,101 +98,7 @@ $("#sub-button").on("click", function() {
 
 });
 // --------------------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------------------
-// function to capitalize the text before saving it.
-// Found this function on W3 schools - https://www.w3resource.com/javascript-exercises/javascript-basic-exercise-50.php
-// --------------------------------------------------------------------------------------
-function capital_letter(str) {
-    // separate the str parameter into pieces based on the 'space' separator
-    str = str.split(" ");
-
-    // traverse the string pieces and convert the first character of each word to Upper Case and then concatenate the rest of the string.
-    for (let i = 0, x = str.length; i < x; i++) {
-        str[i] = str[i][0].toUpperCase() + str[i].substr(1);
-    }
-
-    // return the capitalize string put back together with the 'space' separator.
-    return str.join(" ");
-};
-// --------------------------------------------------------------------------------------
-// end of the capital_letter() function
-// --------------------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------------------
-//  function to add current player name into the correct DB field
-//  Parameter values:
-//  int - an integer to identify what player is being updated
-//      1 - (default) - update player 1 
-//      2 - update player 2
-// --------------------------------------------------------------------------------------
-function addPlay(int=1) {
-
-    // update player 2 information
-    if (int === 2) {
-       
-        dataRPS.update({
-            play2Name: plyrName,
-            updDT: firebase.database.ServerValue.TIMESTAMP,
-        });   
-
-        compMsg = "Added Player 2:  " + plyrName;
-        addNewMsg("BOT", compMsg); 
-
-    } 
-    // update player 1 information - (default)
-    else { 
-
-        dataRPS.set({
-            play1Name: plyrName,
-            // default player 2 while waiting for another player
-            play2Name: "",
-            // default scoresheet
-            win: 0,
-            loss: 0,
-            tie: 0,
-            updDT: firebase.database.ServerValue.TIMESTAMP,
-        });
-    
-        compMsg = "Added Player 1:  " + plyrName;
-        addNewMsg("BOT", compMsg); 
-
-    }
-
-};
-// --------------------------------------------------------------------------------------
-//  end of addPlay() function
-// --------------------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------------------
-//  function to display the name of the player in the correct location
-//  Parameter values:
-//  name - the name as input by the user
-//  int - an integer to identify what player is being updated
-//      1 - (default) - update player 1 
-//      2 - update player 2
-// --------------------------------------------------------------------------------------
-function updatePlayName(name, int=1) {
-
-    // update player 2 section
-    if (int === 2) {
-
-        $("#play2-name").text(name);
-
-    } 
-    // update player 1 section - (default)
-    else {
-    
-        $("#play1-name").text(name);
-    
-    };
-
-    // return the name to be stored in a global variable
-    return name;
-
-};
-// --------------------------------------------------------------------------------------
-//  end of updatePlayName() function
+// end of function triggered with the click of the submit button
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
@@ -260,6 +168,34 @@ $('.list-group-item').on('click', '.hand', function () {
 // end of function triggered with the click of the .hand class
 // --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
+// This function handles events where the "rematch" button is clicked  
+// --------------------------------------------------------------------------------------
+$("#rematch").on("click", function() {
+    
+    // remove player 1 selection from the DB
+    dataRPS.child("play1Hand").remove();
+
+    // remove player 2 selection from the DB
+    dataRPS.child("play2Hand").remove();
+
+    // update DB with new Timestamp
+    dataRPS.update({
+        updDT: firebase.database.ServerValue.TIMESTAMP,
+    });
+
+    //  set DB for a rematch
+    setRematch();
+
+});
+// --------------------------------------------------------------------------------------
+// end of function triggered with the rematch button
+// --------------------------------------------------------------------------------------
+// 
+// **************************************************************************************
+
+// **************************************************************************************
+//  Game Play Firebase Listeners
 // --------------------------------------------------------------------------------------
 //  firebase event listener to be triggerred on the 'value' updates of the /rps folder
 // --------------------------------------------------------------------------------------
@@ -417,6 +353,104 @@ dataRPS.on("child_added", function(snapshot) {
 // --------------------------------------------------------------------------------------
 //  end of firebase event listener
 // --------------------------------------------------------------------------------------
+// 
+// **************************************************************************************
+
+// --------------------------------------------------------------------------------------
+// function to capitalize the text before saving it.
+// Found this function on W3 schools - https://www.w3resource.com/javascript-exercises/javascript-basic-exercise-50.php
+// --------------------------------------------------------------------------------------
+function capital_letter(str) {
+    // separate the str parameter into pieces based on the 'space' separator
+    str = str.split(" ");
+
+    // traverse the string pieces and convert the first character of each word to Upper Case and then concatenate the rest of the string.
+    for (let i = 0, x = str.length; i < x; i++) {
+        str[i] = str[i][0].toUpperCase() + str[i].substr(1);
+    }
+
+    // return the capitalize string put back together with the 'space' separator.
+    return str.join(" ");
+};
+// --------------------------------------------------------------------------------------
+// end of the capital_letter() function
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+//  function to add current player name into the correct DB field
+//  Parameter values:
+//  int - an integer to identify what player is being updated
+//      1 - (default) - update player 1 
+//      2 - update player 2
+// --------------------------------------------------------------------------------------
+function addPlay(int=1) {
+
+    // update player 2 information
+    if (int === 2) {
+       
+        dataRPS.update({
+            play2Name: plyrName,
+            updDT: firebase.database.ServerValue.TIMESTAMP,
+        });   
+
+        compMsg = "Added Player 2:  " + plyrName;
+        addNewMsg("BOT", compMsg); 
+
+    } 
+    // update player 1 information - (default)
+    else { 
+
+        dataRPS.set({
+            play1Name: plyrName,
+            // default player 2 while waiting for another player
+            play2Name: "",
+            // default scoresheet
+            win: 0,
+            loss: 0,
+            tie: 0,
+            updDT: firebase.database.ServerValue.TIMESTAMP,
+        });
+    
+        compMsg = "Added Player 1:  " + plyrName;
+        addNewMsg("BOT", compMsg); 
+
+    }
+
+};
+// --------------------------------------------------------------------------------------
+//  end of addPlay() function
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+//  function to display the name of the player in the correct location
+//  Parameter values:
+//  name - the name as input by the user
+//  int - an integer to identify what player is being updated
+//      1 - (default) - update player 1 
+//      2 - update player 2
+// --------------------------------------------------------------------------------------
+function updatePlayName(name, int=1) {
+
+    // update player 2 section
+    if (int === 2) {
+
+        $("#play2-name").text(name);
+
+    } 
+    // update player 1 section - (default)
+    else {
+    
+        $("#play1-name").text(name);
+    
+    };
+
+    // return the name to be stored in a global variable
+    return name;
+
+};
+// --------------------------------------------------------------------------------------
+//  end of updatePlayName() function
+// --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
 //  function to reflect that the player has made a selection but not have it shown until the other player chooses
@@ -444,30 +478,6 @@ function playChoice(int=1) {
 };
 // --------------------------------------------------------------------------------------
 //  end of playChoice() function
-// --------------------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------------------
-// This function handles events where the "rematch" button is clicked  
-// --------------------------------------------------------------------------------------
-$("#rematch").on("click", function() {
-    
-    // remove player 1 selection from the DB
-    dataRPS.child("play1Hand").remove();
-
-    // remove player 2 selection from the DB
-    dataRPS.child("play2Hand").remove();
-
-    // update DB with new Timestamp
-    dataRPS.update({
-        updDT: firebase.database.ServerValue.TIMESTAMP,
-    });
-
-    //  set DB for a rematch
-    setRematch();
-
-});
-// --------------------------------------------------------------------------------------
-// end of function triggered with the rematch button
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
@@ -597,9 +607,9 @@ function processLoss() {
         updDT: firebase.database.ServerValue.TIMESTAMP,
     });
 };
-
+ 
+// **************************************************************************************
 //  Instant Message functionality below here: 
-
 // --------------------------------------------------------------------------------------
 //  function to add messages to the msg reference in the DB
 // --------------------------------------------------------------------------------------
@@ -673,5 +683,6 @@ dataMSG.orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
 // --------------------------------------------------------------------------------------
 //  end of firebase event listener
 // --------------------------------------------------------------------------------------
-
+// 
+// **************************************************************************************
 
