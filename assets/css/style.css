@@ -1,4 +1,22 @@
-body {
-  
-}
+/* Set Heading Text Color  */
+h1 {
+    color: #4aaaa5;
+    font-family:  Georgia, Times, "Times New Roman", serif;
+  } 
 
+  /* Navigation Bar Details */
+nav {
+    background-color: #ffffff;
+    padding-top: 10px;
+  }
+  
+  /* Set Name Styling */
+  #nav-bar-name {
+      position: relative;
+      /* bottom: 0px; */
+      background-color: #4aaaa5;
+      color: #ffffff;
+      width: 100%;
+      text-align: center;
+      padding: 15px;
+  } 
