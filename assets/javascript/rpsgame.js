@@ -255,6 +255,9 @@ dataRPS.on("value", function(snapshot) {
         // hide the play2 section of choices
         $("#play2-game-choice").hide();
 
+        play1Name = $("#play1-name").text();
+        play2Name = $("#play2-name").text();
+
         // set booleans for the players
         isPlay1 = false;
         isPlay2 = false;
