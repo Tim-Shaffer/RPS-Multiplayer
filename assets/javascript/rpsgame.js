@@ -395,7 +395,7 @@ function checkTimeStamp(snap) {
     
         // testing for greater than 1 but will make it greater than 5 when it works
         // get the difference from the current date/time to the update date/time and use the Integer piece to see if it was more than 5 minutes
-        if (parseInt(cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes') >  1) {
+        if (parseInt(cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes') >  5) {
             
             // clear entries to start a new game
             dataRPS.child("play1Name").remove();

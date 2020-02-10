@@ -8,15 +8,59 @@ h1 {
 nav {
     background-color: #ffffff;
     padding-top: 10px;
-  }
+}
   
-  /* Set Name Styling */
-  #nav-bar-name {
-      position: relative;
-      /* bottom: 0px; */
-      background-color: #4aaaa5;
-      color: #ffffff;
-      width: 100%;
-      text-align: center;
-      padding: 15px;
-  } 
+/* Set Name Styling */
+#nav-bar-name {
+    position: relative;
+    /* bottom: 0px; */
+    background-color: #4aaaa5;
+    color: #ffffff;
+    width: 100%;
+    text-align: center;
+    padding: 15px;
+} 
+
+.card-header {
+    line-height: 1em;
+    text-align: center;
+    border-bottom: 0em;
+}
+
+.list-group-item {
+    border: 0;
+    padding-top: .25rem;
+    padding-bottom: .25rem;
+    padding-left: .75rem;
+    padding-right: .75rem;
+}
+
+.card-body h5 {
+    text-align: center;
+}
+
+form#IM {
+    text-align: left;
+}
+
+input#button-input {
+    width: 50em;
+    margin: 1em;
+}
+
+#messages {
+    line-height: 1em;
+    border: 0;
+    border-radius: 0;
+}
+
+tr {
+    line-height: normal;
+}
+
+.card {
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+
+
