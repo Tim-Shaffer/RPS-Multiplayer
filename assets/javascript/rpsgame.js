@@ -332,11 +332,14 @@ dataRPS.on("value", function(snapshot) {
         
         // hide the play1 section of choices
         $("#play1-game-choice").hide();
-        $("#play1-score").hide();
 
         // hide the play2 section of choices
         $("#play2-game-choice").hide();
-        $("#play2-score").hide();
+
+        // hide the results 
+        // $("#play1-score").hide();
+        // $("#play2-score").hide();
+        // $("#results-space").hide();
 
         // set booleans for the players
         isPlay1 = false;
