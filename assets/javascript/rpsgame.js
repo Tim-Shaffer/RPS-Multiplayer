@@ -131,6 +131,7 @@ function addPlay(int=1) {
        
         dataRPS.update({
             play2Name: plyrName,
+            updDT: firebase.database.ServerValue.TIMESTAMP,
         });   
 
         compMsg = "Added Player 2:  " + plyrName;
@@ -148,6 +149,7 @@ function addPlay(int=1) {
             win: 0,
             loss: 0,
             tie: 0,
+            updDT: firebase.database.ServerValue.TIMESTAMP,
         });
     
         compMsg = "Added Player 1:  " + plyrName;
@@ -216,6 +218,7 @@ $('.list-group-item').on('click', '.hand', function () {
         // update DB with play1Hand 
         dataRPS.update({
             play1Hand: hand,
+            updDT: firebase.database.ServerValue.TIMESTAMP,
         });
 
         // hide the section because a choice was already made and processed
@@ -238,6 +241,7 @@ $('.list-group-item').on('click', '.hand', function () {
         // update DB with play2Hand
         dataRPS.update({
             play2Hand: hand,
+            updDT: firebase.database.ServerValue.TIMESTAMP,
         });
 
         // hide the section because a choice was already made and processed
@@ -246,6 +250,10 @@ $('.list-group-item').on('click', '.hand', function () {
 
     // remove the "rematchSelected" field from the DB to note players are making selections on the game
     dataRPS.child("rematchSelected").remove();
+    // update DB with new Teimestamp
+    dataRPS.update({
+        updDT: firebase.database.ServerValue.TIMESTAMP,
+    });
     
 });
 // --------------------------------------------------------------------------------------
@@ -449,6 +457,11 @@ $("#rematch").on("click", function() {
     // remove player 2 selection from the DB
     dataRPS.child("play2Hand").remove();
 
+    // update DB with new Timestamp
+    dataRPS.update({
+        updDT: firebase.database.ServerValue.TIMESTAMP,
+    });
+
     //  set DB for a rematch
     setRematch();
 
@@ -465,6 +478,7 @@ function setRematch() {
     // update DB to reflect a rematch was selected to allow "child-added" listener to update for both players 
     dataRPS.update({
         rematchSelected: true,
+        updDT: firebase.database.ServerValue.TIMESTAMP,
     });
 
     // make the choices available for the active player of the current session
@@ -551,6 +565,7 @@ function processTie() {
     // update DB with tie totals
     dataRPS.update({
         tie: tie,
+        updDT: firebase.database.ServerValue.TIMESTAMP,
     });
 
 };
@@ -565,6 +580,7 @@ function processWin() {
     // update DB with win totals
     dataRPS.update({
         win: win,
+        updDT: firebase.database.ServerValue.TIMESTAMP,
     });
 };
 
@@ -578,6 +594,7 @@ function processLoss() {
     // update DB with loss totals
     dataRPS.update({
         loss: loss,
+        updDT: firebase.database.ServerValue.TIMESTAMP,
     });
 };
 
