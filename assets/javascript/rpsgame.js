@@ -39,51 +39,6 @@ var tie = 0;
 // global variables for moment processing
 var unixFormat = "x";
 
-function checkTimeStamp(snap) {
-
-    var status = (snap.val() !== null)
-
-    if (status) {
-        // A record exists so we need to check the timestamp to see if it is recent (< 5 mins)
-        var lastUpdDT = snap.val().updDT;
-        var cnvtUpDT = moment(lastUpdDT, unixFormat);
-        // console.log("last update timestamp:  " + cnvtUpDT.format("MM/DD/YY hh:mm:ss"));
-    
-        var currDT = moment().format(unixFormat);
-        var cnvtCurrDT = moment(currDT, unixFormat);
-        // console.log("current timestamp:  " + cnvtCurrDT.format("MM/DD/YY hh:mm:ss"));
-    
-        // console.log('Difference is ', cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes');
-        // testing for greater than 1 but will make it greater than 5 when it works
-        if (parseInt(cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes') >  1) {
-            // clear entries to start a new game
-            dataRPS.child("play1Name").remove();
-            dataRPS.child("play2Name").remove();
-            win = 0;
-            dataRPS.child("win").remove();
-            loss = 0;
-            dataRPS.child("loss").remove();
-            tie = 0;
-            dataRPS.child("tie").remove();
-            dataRPS.child("play1Hand").remove();
-            dataRPS.child("play2Hand").remove();
-            dataRPS.child("rematchSelected").remove();
-
-            compMsg = "New Game Created with new player due to lack of activity!";
-            addNewMsg("BOT", compMsg);
-
-            return false;
-        }
-        else {
-            return true;
-        };
-    } 
-    else {
-        return false;
-    } 
-
-};
-
 // **************************************************************************************
 //  Game Play Event Listeners
 // --------------------------------------------------------------------------------------
@@ -413,6 +368,78 @@ dataRPS.on("child_added", function(snapshot) {
 // --------------------------------------------------------------------------------------
 // 
 // **************************************************************************************
+
+// --------------------------------------------------------------------------------------
+//  function to compare timestamp to current time and decide if the game is still active or not
+//  Parameter values:
+//  snap - a current snapshot of the rps firebase database
+// --------------------------------------------------------------------------------------
+function checkTimeStamp(snap) {
+
+    var status = (snap.val() !== null)
+
+    // A record exists so we need to check the timestamp to see if it is recent (< 5 mins)
+    if (status) {
+        
+        // local variable to hold the last time the DB was updated
+        var lastUpdDT = snap.val().updDT;
+        // local variable to format the update date/time as unix for further comparison
+        var cnvtUpDT = moment(lastUpdDT, unixFormat);
+        // console.log("last update timestamp:  " + cnvtUpDT.format("MM/DD/YY hh:mm:ss"));
+    
+        // local variable to hold the current time
+        var currDT = moment().format(unixFormat);
+        // local variable to format the current date/time as unix for further comparison
+        var cnvtCurrDT = moment(currDT, unixFormat);
+        // console.log("current timestamp:  " + cnvtCurrDT.format("MM/DD/YY hh:mm:ss"));
+    
+        // testing for greater than 1 but will make it greater than 5 when it works
+        // get the difference from the current date/time to the update date/time and use the Integer piece to see if it was more than 5 minutes
+        if (parseInt(cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes') >  1) {
+            
+            // clear entries to start a new game
+            dataRPS.child("play1Name").remove();
+            dataRPS.child("play2Name").remove();
+            
+            win = 0;
+            dataRPS.child("win").remove();
+            
+            loss = 0;
+            dataRPS.child("loss").remove();
+            
+            tie = 0;
+            dataRPS.child("tie").remove();
+            
+            dataRPS.child("play1Hand").remove();
+            dataRPS.child("play2Hand").remove();
+            
+            dataRPS.child("rematchSelected").remove();
+
+            // log a message that this player started a new game!
+            compMsg = "New Game Created with new player due to lack of activity!";
+            addNewMsg("BOT", compMsg);
+
+            // returning false allows processing to continue for player 1
+            return false;
+        }
+        // a game exists and it is active, allow to see if this should be player 2 or bystander
+        else {
+
+            return true;
+        };
+    } 
+    // no game exists
+    else {
+        
+        // returning false allows processing to continue for player 1
+        return false;
+
+    } 
+
+};
+// --------------------------------------------------------------------------------------
+//  end of the checkTimeStamp() function
+// --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
 // function to capitalize the text before saving it.
