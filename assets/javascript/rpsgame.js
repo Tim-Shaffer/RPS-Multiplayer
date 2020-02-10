@@ -416,7 +416,7 @@ function checkTimeStamp(snap) {
             dataRPS.child("rematchSelected").remove();
 
             // log a message that this player started a new game!
-            compMsg = "New Game Created with new player due to lack of activity!";
+            compMsg = "New Game Created with new player!";
             addNewMsg("BOT", compMsg);
 
             // returning false allows processing to continue for player 1
@@ -586,6 +586,10 @@ function setRematch() {
         
     };
 
+    // hide the previous results
+    $("#story-line").hide();
+    $("#winner-line").hide();
+
 };
 // --------------------------------------------------------------------------------------
 //  end of setRematch() function
@@ -604,6 +608,9 @@ function playGame() {
 
     // Check for ties first 
     if (play1Hand === play2Hand) {
+        
+        $("#story-line").text(" ");
+
         processTie();
     } 
     // Player 1 chose Rock 
@@ -611,11 +618,17 @@ function playGame() {
     
         // Rock beats Scissors
         if (play2Hand === "Scissor"){
+
+            $("#story-line").text("Rock Smashes Scissors");
+
             processWin();
             
         // Rock loses to Paper
         } 
         else {
+
+            $("#story-line").text("Paper Covers Rock");
+
             processLoss();
 
         }
@@ -624,10 +637,16 @@ function playGame() {
     else if (play1Hand === "Paper") {
         // Paper beats Rock
         if (play2Hand === "Rock"){
+
+            $("#story-line").text("Paper Covers Rock");
+
             processWin();
 
         // Paper loses to Scissors
         } else {
+
+            $("#story-line").text("Scissors Cut Paper");
+
             processLoss();
 
         }
@@ -636,10 +655,16 @@ function playGame() {
     else if (play1Hand === "Scissor") {
         // Scissors beat Paper
         if (play2Hand === "Paper"){
+    
+            $("#story-line").text("Scissors Cut Paper");
+            
             processWin();
 
         // Scissors lose to Rock
         } else {
+
+            $("#story-line").text("Rock Smashes Scissors");
+
             processLoss();
 
         }
@@ -648,14 +673,23 @@ function playGame() {
     // show the button to allow a rematch to be requested.
     $("#rematch").show();
 
+    // show the current results
+    $("#story-line").show();
+    $("#winner-line").show();
+
 };
 // --------------------------------------------------------------------------------------
 //   end of playGame() function
 // --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
+//   function to handle the updates for a tie match
+// --------------------------------------------------------------------------------------
 function processTie() {
 
     tie++;
+
+    $("#winner-line").text("It's a Tie!")
 
     // update DB with tie totals
     dataRPS.update({
@@ -663,20 +697,34 @@ function processTie() {
     });
 
 };
+// --------------------------------------------------------------------------------------
+//   processTie()
+// --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
+//   function to handle the updates when player 1 wins
+// --------------------------------------------------------------------------------------
 function processWin() {
 
     win++;
 
     $("#play1-hand").addClass("btn-success");
     $("#play2-hand").addClass("btn-danger");
+
+    $("#winner-line").text(play1Name + "  Wins!!")
     
     // update DB with win totals
     dataRPS.update({
         win: win,
     });
 };
+// --------------------------------------------------------------------------------------
+//   end of processWin() function
+// --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
+//   function to handle the updates when player 1 loses
+// --------------------------------------------------------------------------------------
 function processLoss() {
 
     loss++;
@@ -684,11 +732,16 @@ function processLoss() {
     $("#play2-hand").addClass("btn-success");
     $("#play1-hand").addClass("btn-danger");
 
+    $("#winner-line").text(play2Name + "  Wins!!")
+
     // update DB with loss totals
     dataRPS.update({
         loss: loss,
     });
 };
+// --------------------------------------------------------------------------------------
+//   end of processLoss() function
+// --------------------------------------------------------------------------------------
  
 // **************************************************************************************
 //  Instant Message functionality below here: 
