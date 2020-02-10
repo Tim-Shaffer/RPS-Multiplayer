@@ -118,18 +118,6 @@ function capital_letter(str) {
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
-// function addUser() {
-//     dataRPS.set({
-//         play1Name: plyrName,
-//         play2Name: "",
-//     });
-
-//     compMsg = "Added Player 1:  " + plyrName;
-//     addNewMsg("BOT", compMsg); 
-// };
-// --------------------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------------------
 //  function to add current player name into the correct DB field
 //  Parameter values:
 //  int - an integer to identify what player is being updated
@@ -156,6 +144,10 @@ function addPlay(int=1) {
             play1Name: plyrName,
             // default player 2 while waiting for another player
             play2Name: "",
+            // default scoresheet
+            win: 0,
+            loss: 0,
+            tie: 0,
         });
     
         compMsg = "Added Player 1:  " + plyrName;
@@ -197,19 +189,6 @@ function updatePlayName(name, int=1) {
 };
 // --------------------------------------------------------------------------------------
 //  end of updatePlayName() function
-// --------------------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------------------
-//  function to display the name of player 2
-// --------------------------------------------------------------------------------------
-// function updatePlay2Name(name) {
-//     //  update the player section
-//     $("#play2-name").text(name);
-//     return name;
-
-// };
-// --------------------------------------------------------------------------------------
-//  end of updatePlay2Name() function
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
@@ -336,11 +315,6 @@ dataRPS.on("value", function(snapshot) {
         // hide the play2 section of choices
         $("#play2-game-choice").hide();
 
-        // hide the results 
-        // $("#play1-score").hide();
-        // $("#play2-score").hide();
-        // $("#results-space").hide();
-
         // set booleans for the players
         isPlay1 = false;
         isPlay2 = false;
@@ -349,6 +323,21 @@ dataRPS.on("value", function(snapshot) {
         $("#rematch").hide();
 
     };
+ 
+    win = snapshot.val().win;
+    // player 1 Score is being held in the variables
+    $("#play1-win").text(win);
+    // player 2 Score is the opposite of player 1 score
+    $("#play2-loss").text(win); 
+    loss = snapshot.val().loss; 
+    // player 1 Score is being held in the variables
+    $("#play2-win").text(loss);
+    // player 2 Score is the opposite of player 1 score
+    $("#play1-loss").text(loss);
+    tie = snapshot.val().tie;
+    // ties will be the same 
+    $("#play1-tie").text(tie);
+    $("#play2-tie").text(tie);
      
 });
 // --------------------------------------------------------------------------------------
@@ -386,6 +375,26 @@ dataRPS.on("child_added", function(snapshot) {
         isPlay2ChoiceMade = false; 
         play2Hand = "";
 
+    }
+    else if (snapshot.key === 'win') {  
+        win = snapshot.val();
+        // player 1 Score is being held in the variables
+        $("#play1-win").text(win);
+        // player 2 Score is the opposite of player 1 score
+        $("#play2-loss").text(win); 
+    }
+    else if (snapshot.key === 'loss') { 
+        loss = snapshot.val(); 
+        // player 1 Score is being held in the variables
+        $("#play2-win").text(loss);
+        // player 2 Score is the opposite of player 1 score
+        $("#play1-loss").text(loss);
+    }
+    else if (snapshot.key === 'tie') {
+        tie = snapshot.val();
+        // ties will be the same 
+        $("#play1-tie").text(tie);
+        $("#play2-tie").text(tie);
     };
 
     // decide the game when both players have selected their hands
@@ -486,62 +495,46 @@ function playGame() {
 
     // Check for ties first 
     if (play1Hand === play2Hand) {
-        tie++;
+        processTie();
     } 
     // Player 1 chose Rock 
     else if (play1Hand === "Rock") {
     
         // Rock beats Scissors
         if (play2Hand === "Scissor"){
-            win++;
-            $("#play1-hand").addClass("btn-success");
-            $("#play2-hand").addClass("btn-danger");
+            processWin();
+            
         // Rock loses to Paper
         } 
         else {
-            loss++;
-            $("#play2-hand").addClass("btn-success");
-            $("#play1-hand").addClass("btn-danger");
+            processLoss();
+
         }
     }
     // Player 1 chose Paper
     else if (play1Hand === "Paper") {
         // Paper beats Rock
         if (play2Hand === "Rock"){
-            win++;
-            $("#play1-hand").addClass("btn-success");
-            $("#play2-hand").addClass("btn-danger");
+            processWin();
+
         // Paper loses to Scissors
         } else {
-            loss++;
-            $("#play2-hand").addClass("btn-success");
-            $("#play1-hand").addClass("btn-danger");
+            processLoss();
+
         }
     } 
     // Player 1 chose Scissors
     else if (play1Hand === "Scissor") {
         // Scissors beat Paper
         if (play2Hand === "Paper"){
-            win++;
-            $("#play1-hand").addClass("btn-success");
-            $("#play2-hand").addClass("btn-danger");
+            processWin();
+
         // Scissors lose to Rock
         } else {
-            loss++;
-            $("#play2-hand").addClass("btn-success");
-            $("#play1-hand").addClass("btn-danger");
+            processLoss();
+
         }
     };
-    
-    // player 1 Score is being held in the variables
-    $("#play1-win").text(win);
-    $("#play1-loss").text(loss);
-    $("#play1-tie").text(tie);
-
-    // player 2 Score is the opposite of player 1 score   
-    $("#play2-win").text(loss);
-    $("#play2-loss").text(win);
-    $("#play2-tie").text(tie);
 
     // show the button to allow a rematch to be requested.
     $("#rematch").show();
@@ -550,6 +543,43 @@ function playGame() {
 // --------------------------------------------------------------------------------------
 //   end of playGame() function
 // --------------------------------------------------------------------------------------
+
+function processTie() {
+
+    tie++;
+
+    // update DB with tie totals
+    dataRPS.update({
+        tie: tie,
+    });
+
+};
+
+function processWin() {
+
+    win++;
+
+    $("#play1-hand").addClass("btn-success");
+    $("#play2-hand").addClass("btn-danger");
+    
+    // update DB with win totals
+    dataRPS.update({
+        win: win,
+    });
+};
+
+function processLoss() {
+
+    loss++;
+
+    $("#play2-hand").addClass("btn-success");
+    $("#play1-hand").addClass("btn-danger");
+
+    // update DB with loss totals
+    dataRPS.update({
+        loss: loss,
+    });
+};
 
 //  Instant Message functionality below here: 
 
