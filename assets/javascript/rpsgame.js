@@ -36,6 +36,48 @@ var win = 0;
 var loss = 0;
 var tie = 0;
 
+// global variables for moment processing
+var unixFormat = "x";
+
+function checkTimeStamp(snap) {
+
+    var status = (snap.val() !== null)
+
+    if (status) {
+        // A record exists so we need to check the timestamp to see if it is recent (< 5 mins)
+        var lastUpdDT = snap.val().updDT;
+        var cnvtUpDT = moment(lastUpdDT, unixFormat);
+        // console.log("last update timestamp:  " + cnvtUpDT.format("MM/DD/YY hh:mm:ss"));
+    
+        var currDT = moment().format(unixFormat);
+        var cnvtCurrDT = moment(currDT, unixFormat);
+        // console.log("current timestamp:  " + cnvtCurrDT.format("MM/DD/YY hh:mm:ss"));
+    
+        console.log('Difference is ', cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes');
+        // testing for greater than 1 but will make it greater than 5 when it works
+        if (parseInt(cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes') >  1) {
+            // clear entries to start a new game
+            dataRPS.child("play1Name").remove();
+            dataRPS.child("play2Name").remove();
+            win = 0;
+            dataRPS.child("win").remove();
+            loss = 0;
+            dataRPS.child("loss").remove();
+            tie = 0;
+            dataRPS.child("tie").remove();
+
+            return false;
+        }
+        else {
+            return true;
+        };
+    } 
+    else {
+        return false;
+    } 
+
+};
+
 // **************************************************************************************
 //  Game Play Event Listeners
 // --------------------------------------------------------------------------------------
@@ -53,10 +95,13 @@ $("#sub-button").on("click", function() {
     dataRPS.once('value', function(snapshot) {
 
         // set the exists variable according to whether there is a record in the DB
-        var exists = (snapshot.val() !== null);
+        // check the timestamp to see if a new game should be created or we are adding to the existing game
+        // var exists = (snapshot.val() !== null); 
+        var exists = checkTimeStamp(snapshot); 
         
         // if a record exists, this is not the first entry 
         if (exists) {
+
             // see if there is an entry or the default for player 2
             if (snapshot.val().play2Name === "") {
                 
@@ -84,7 +129,7 @@ $("#sub-button").on("click", function() {
             addPlay(1);
             // set the player as ready to play or chat
             playerReady = true;
-        }
+        };
     });
 
     // Clear Information from the form
@@ -126,7 +171,6 @@ $('.list-group-item').on('click', '.hand', function () {
         // update DB with play1Hand 
         dataRPS.update({
             play1Hand: hand,
-            updDT: firebase.database.ServerValue.TIMESTAMP,
         });
 
         // hide the section because a choice was already made and processed
@@ -149,7 +193,6 @@ $('.list-group-item').on('click', '.hand', function () {
         // update DB with play2Hand
         dataRPS.update({
             play2Hand: hand,
-            updDT: firebase.database.ServerValue.TIMESTAMP,
         });
 
         // hide the section because a choice was already made and processed
@@ -158,10 +201,6 @@ $('.list-group-item').on('click', '.hand', function () {
 
     // remove the "rematchSelected" field from the DB to note players are making selections on the game
     dataRPS.child("rematchSelected").remove();
-    // update DB with new Teimestamp
-    dataRPS.update({
-        updDT: firebase.database.ServerValue.TIMESTAMP,
-    });
     
 });
 // --------------------------------------------------------------------------------------
@@ -178,11 +217,6 @@ $("#rematch").on("click", function() {
 
     // remove player 2 selection from the DB
     dataRPS.child("play2Hand").remove();
-
-    // update DB with new Timestamp
-    dataRPS.update({
-        updDT: firebase.database.ServerValue.TIMESTAMP,
-    });
 
     //  set DB for a rematch
     setRematch();
@@ -268,17 +302,25 @@ dataRPS.on("value", function(snapshot) {
 
     };
  
-    win = snapshot.val().win;
+    if (dataRPS.child("win") !== null) {
+        win = snapshot.val().win;
+    };
     // player 1 Score is being held in the variables
     $("#play1-win").text(win);
     // player 2 Score is the opposite of player 1 score
     $("#play2-loss").text(win); 
-    loss = snapshot.val().loss; 
+    
+    if (dataRPS.child("loss")) {
+        loss = snapshot.val().loss; 
+    };
     // player 1 Score is being held in the variables
     $("#play2-win").text(loss);
     // player 2 Score is the opposite of player 1 score
     $("#play1-loss").text(loss);
-    tie = snapshot.val().tie;
+    
+    if (dataRPS.child("tie")) {
+        tie = snapshot.val().tie; 
+    };
     // ties will be the same 
     $("#play1-tie").text(tie);
     $("#play2-tie").text(tie);
@@ -575,7 +617,6 @@ function processTie() {
     // update DB with tie totals
     dataRPS.update({
         tie: tie,
-        updDT: firebase.database.ServerValue.TIMESTAMP,
     });
 
 };
@@ -590,7 +631,6 @@ function processWin() {
     // update DB with win totals
     dataRPS.update({
         win: win,
-        updDT: firebase.database.ServerValue.TIMESTAMP,
     });
 };
 
@@ -604,7 +644,6 @@ function processLoss() {
     // update DB with loss totals
     dataRPS.update({
         loss: loss,
-        updDT: firebase.database.ServerValue.TIMESTAMP,
     });
 };
  
@@ -661,7 +700,6 @@ dataMSG.orderByKey().limitToLast(10).on("child_added", function(childSnapshot) {
         var dtTm = childSnapshot.val().dateAdded;
 
         // variables to convert the date into a more readable format
-        var unixFormat = "x";
         var convertedDate = moment(dtTm, unixFormat);
         
         // Create the new row of messages to display
