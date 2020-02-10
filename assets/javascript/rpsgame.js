@@ -20,12 +20,17 @@ var dataMSG = database.ref("/msgs");
 var plyrName;
 var compMsg;
 var playerReady = false;
+var win = 0;
+var loss = 0;
+var tie = 0;
 
 //  global variables for player information
 var play1Name, play2Name;
 var play1Hand, play2Hand;
 var isPlay1 = false;
 var isPlay2 = false;
+var isPlay1ChoiceMade = false;
+var isPlay2ChoiceMade = false;
 
 // --------------------------------------------------------------------------------------
 $("#sub-button").on("click", function() {
@@ -112,17 +117,7 @@ function addPlay2() {
 };
 // --------------------------------------------------------------------------------------
 
-// --------------------------------------------------------------------------------------
-function addNewMsg(tag, msg) {
-    // $("#msg-text").append('<p>' + tag + ':  ' + msg + '</p>')
-    dataMSG.push({
-        userName: tag,
-        message: msg,
-        dateAdded: firebase.database.ServerValue.TIMESTAMP,
-    });
 
-};
-// --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
 //  function to display the name of player 1
@@ -162,13 +157,13 @@ $('.list-group-item').on('click', '.hand', function () {
 
         // play1 selection
         if ($(this).attr('id') === 'rock') {
-            hand = 'r';
+            hand = 'Rock';
         }
         else if ($(this).attr('id') === 'paper') {
-            hand = 'p';
+            hand = 'Paper';
         } 
         else if ($(this).attr('id') === 'scissor') {
-            hand = 's';
+            hand = 'Scissor';
         };
 
         // update DB with play1Hand 
@@ -177,29 +172,31 @@ $('.list-group-item').on('click', '.hand', function () {
         });
 
         // hide the section because a choice was already made and processed
-        $("#plyr-game-choice").hide();
+        $("#play1-game-choice").hide();
 
     }
     else if ($(this).hasClass('play2')) {
 
         // play2 selection
         if ($(this).attr('id') === 'rock') {
-            hand = 'r';
+            hand = 'Rock';
         }
         else if ($(this).attr('id') === 'paper') {
-            hand = 'p';
+            hand = 'Paper';
         } 
         else if ($(this).attr('id') === 'scissor') {
-            hand = 's';
+            hand = 'Scissor';
         };
-        // update DB with oppHand
+        // update DB with play2Hand
         dataRPS.update({
-            oppHand: hand,
+            play2Hand: hand,
         });
 
         // hide the section because a choice was already made and processed
-        $("#opp-game-choice").hide();
+        $("#play2-game-choice").hide();
     };    
+
+    dataRPS.child("rematchSelected").remove();
     
 });
 // --------------------------------------------------------------------------------------
@@ -222,27 +219,38 @@ dataRPS.on("value", function(snapshot) {
 
     // Check which player this device is associated to 
     if (plyrName === play1Name) {
-        
-        // hide the play2 section of choices
-        $("#play2-game-choice").hide();
-        // show the play1 section of choices
-        $("#play1-game-choice").show();
-        // set booleans for the players
-        isPlay1 = true;
-        isPlay2 = false;
+
+        if (!isPlay1ChoiceMade) {
+
+            // hide the play2 section of choices
+            $("#play2-game-choice").hide();
+            // show the play1 section of choices
+            $("#play1-game-choice").show();
+            // set booleans for the players
+            isPlay1 = true;
+            isPlay2 = false;
+            
+            $("#rematch").hide();
+
+        };
 
     } 
     // player 2 
     else if (plyrName === play2Name) {
-        
-        // hide the play1 section of choices
-        $("#play1-game-choice").hide();
-        // show the play2 section of choices
-        $("#play2-game-choice").show();
-        // set booleans for the players
-        isPlay2 = true;
-        isPlay1 = false;
 
+        if (!isPlay2ChoiceMade) {
+        
+            // hide the play1 section of choices
+            $("#play1-game-choice").hide();
+            // show the play2 section of choices
+            $("#play2-game-choice").show();
+            // set booleans for the players
+            isPlay2 = true;
+            isPlay1 = false;
+
+            $("#rematch").hide();
+        
+        };
 
     } 
     // this session is just a bystander 
@@ -255,6 +263,8 @@ dataRPS.on("value", function(snapshot) {
         // set booleans for the players
         isPlay1 = false;
         isPlay2 = false;
+
+        $("#rematch").hide();
 
     };
      
@@ -274,10 +284,28 @@ dataRPS.on("child_added", function(snapshot) {
     if (snapshot.key === 'play1Hand') {
         // update for player one selection
         play1Hand = snapshot.val();
+        play1Choice();
     }
     else if (snapshot.key === 'play2Hand') {
         // update for player two selection 
         play2Hand = snapshot.val();
+        play2Choice();
+    } else if (snapshot.key === 'rematchSelected') {
+        $("#rematch").hide();
+        $("#play1-hand").text("Player 1 Hand");
+        $("#play1-hand").removeClass("btn-success");
+        $("#play1-hand").removeClass("btn-danger");
+        $("#play1-hand").removeClass("btn-secondary")
+        isPlay1ChoiceMade = false;
+        play1Hand = "";
+
+        $("#play2-hand").text("Player 2 Hand");
+        $("#play2-hand").removeClass("btn-success");
+        $("#play2-hand").removeClass("btn-danger"); 
+        $("#play2-hand").removeClass("btn-secondary")
+        isPlay2ChoiceMade = false; 
+        play2Hand = "";
+
     };
 
     // decide the game when both players have selected their hands
@@ -285,6 +313,7 @@ dataRPS.on("child_added", function(snapshot) {
         // game played
         console.log("A game has been played!");
         // function to determine the winner
+        playGame();
         // add a new game button for either user to click 
         // then show\hide sections accordingly
         // update DB with just name and play2
@@ -295,7 +324,147 @@ dataRPS.on("child_added", function(snapshot) {
 //  end of firebase event listener
 // --------------------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------------------
+function play1Choice() {
+
+    $("#play1-hand").addClass("btn-secondary").text("???");
+    isPlay1ChoiceMade = true;
+
+};
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+function play2Choice() {
+
+    $("#play2-hand").addClass("btn-secondary").text("???");
+    isPlay2ChoiceMade = true;
+
+};
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+// This function handles events where the "rematch" button is clicked  
+// --------------------------------------------------------------------------------------
+$("#rematch").on("click", function() {
+    
+    // reset player 1 section
+    dataRPS.child("play1Hand").remove();
+
+    // reset player 2 section 
+    dataRPS.child("play2Hand").remove();
+
+    clearGamePlay();
+
+});
+// --------------------------------------------------------------------------------------
+// end of function triggered with the add button
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+function clearGamePlay() {
+
+    // update DB with play1Hand 
+    dataRPS.update({
+        rematchSelected: true,
+    });
+
+    if (isPlay1) {
+        $("#play1-game-choice").show();
+        
+    } 
+    else if (isPlay2) {
+        $("#play2-game-choice").show();     
+        
+    }
+
+};
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+function playGame() {
+
+    // show the hands selected
+    $("#play1-hand").text(play1Hand);
+    $("#play2-hand").text(play2Hand);
+
+    // Check for ties first 
+    if (play1Hand === play2Hand) {
+        tie++;
+    } 
+    else if (play1Hand === "Rock") // rock was picked 
+    {
+    // rock beats scissors
+    if (play2Hand === "Scissor"){
+        win++;
+        $("#play1-hand").addClass("btn-success");
+        $("#play2-hand").addClass("btn-danger");
+    // rock loses to paper
+    } else {
+        loss++;
+        $("#play2-hand").addClass("btn-success");
+        $("#play1-hand").addClass("btn-danger");
+    }
+    } 
+    else if (play1Hand === "Paper") // paper was picked
+    {
+    // paper beats rock
+    if (play2Hand === "Rock"){
+        win++;
+        $("#play1-hand").addClass("btn-success");
+        $("#play2-hand").addClass("btn-danger");
+    // paper loses to scissors
+    } else {
+        loss++;
+        $("#play2-hand").addClass("btn-success");
+        $("#play1-hand").addClass("btn-danger");
+    }
+    } 
+    else if (play1Hand === "Scissor") // scissor was picked
+    {
+    // scissor beats paper
+    if (play2Hand === "Paper"){
+        win++;
+        $("#play1-hand").addClass("btn-success");
+        $("#play2-hand").addClass("btn-danger");
+    // scissor loses to rock
+    } else {
+        loss++;
+        $("#play2-hand").addClass("btn-success");
+        $("#play1-hand").addClass("btn-danger");
+    }
+    };
+    
+    // player 1 Score
+    $("#play1-win").text(win);
+    $("#play1-loss").text(loss);
+    $("#play1-tie").text(tie);
+
+    // player 2 Score   
+    $("#play2-win").text(loss);
+    $("#play2-loss").text(win);
+    $("#play2-tie").text(tie);
+
+    $("#rematch").show();
+
+};
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+
 //  Instant Message functionality below here: 
+
+// --------------------------------------------------------------------------------------
+function addNewMsg(tag, msg) {
+    dataMSG.push({
+        userName: tag,
+        message: msg,
+        dateAdded: firebase.database.ServerValue.TIMESTAMP,
+    });
+
+};
+// --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
 // This function handles events where the "add-msg" button is clicked  

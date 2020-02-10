@@ -57,19 +57,15 @@
             
                 <h3 class="card-header" id="play1-name">Player One</h3>
                 <div class="card-body">
-                    <h5 class="card-title">Scores:</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">Wins:</h6>
-                    <h6 class="card-subtitle mb-2 text-muted">Losses:</h6>
-                    <h6 class="card-subtitle mb-2 text-muted">Ties:</h6>
                     <ul class="list-group list-group-flush" id="play1-game-choice">
                         <li class="list-group-item">
-                            <button type="button" class="btn btn-outline-success btn-lg btn-block play1 hand" id="rock" value="r">Rock</button>
+                            <button type="button" class="btn btn-primary btn-sm btn-block play1 hand" id="rock" value="r">Rock</button>
                         </li>
                         <li class="list-group-item">
-                            <button type="button" class="btn btn-outline-success btn-lg btn-block play1 hand" id="paper" value="p">Paper</button>
+                            <button type="button" class="btn btn-warning btn-sm btn-block play1 hand" id="paper" value="p">Paper</button>
                         </li>
                         <li class="list-group-item">
-                            <button type="button" class="btn btn-outline-success btn-lg btn-block play1 hand" id="scissor" value="s">Scissor</button>
+                            <button type="button" class="btn btn-info btn-sm btn-block play1 hand" id="scissor" value="s">Scissor</button>
                         </li>
                     </ul>
 
@@ -77,27 +73,110 @@
             
             </div>
 
-            <div class="col-sm-4 card" id="blank-space"> </div>
+            <div class="col-sm-4 card" id="game-space"> 
+
+                <h3 class="card-header" >Game Play</h3>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <button type="button" class="btn btn-sm btn-block" id="play1-hand" disabled>Player 1 Hand</button>
+                        </li>
+                        <li class="list-group-item">
+                            <button type="button" class="btn btn-sm btn-block" >versus</button>
+                        </li>
+                        <li class="list-group-item">
+                            <button type="button" class="btn btn-sm btn-block" id="play2-hand" disabled>Player 2 Hand</button>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
             
             <div class="col-sm-4 card" id="player2">
 
                 <h3 class="card-header" id="play2-name">Player Two</h3>
                 <div class="card-body">
-                    <h5 class="card-title">Scores:</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">Wins:</h6>
-                    <h6 class="card-subtitle mb-2 text-muted">Losses:</h6>
-                    <h6 class="card-subtitle mb-2 text-muted">Ties:</h6>
                     <ul class="list-group list-group-flush" id="play2-game-choice">
                         <li class="list-group-item">
-                            <button type="button" class="btn btn-outline-success btn-lg btn-block play2 hand" id="rock" value="r">Rock</button>
+                            <button type="button" class="btn btn-primary btn-sm btn-block play2 hand" id="rock" value="r">Rock</button>
                         </li>
                         <li class="list-group-item">
-                            <button type="button" class="btn btn-outline-success btn-lg btn-block play2 hand" id="paper" value="p">Paper</button>
+                            <button type="button" class="btn btn-warning btn-sm btn-block play2 hand" id="paper" value="p">Paper</button>
                         </li>
                         <li class="list-group-item">
-                            <button type="button" class="btn btn-outline-success btn-lg btn-block play2 hand" id="scissor" value="s">Scissor</button>
+                            <button type="button" class="btn btn-info btn-sm btn-block play2 hand" id="scissor" value="s">Scissor</button>
                         </li>
                     </ul>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="row">
+            
+            <div class="col-sm-4 card" id="play1-score">
+            
+                <div class="card-body">
+                    <h5 class="card-title">Scores:</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">      
+                            <h6 class="card-subtitle text-muted">Wins:</h6>
+                            <span class="badge badge-success badge-pill" id="play1-win">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">      
+                            <h6 class="card-subtitle text-muted">Losses:</h6>
+                            <span class="badge badge-danger badge-pill" id="play1-loss">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">      
+                            <h6 class="card-subtitle text-muted">Ties:</h6>
+                            <span class="badge badge-secondary badge-pill" id="play1-tie">0</span>
+                        </li>
+                    </ul>  
+
+                </div>
+            
+            </div>
+
+            <div class="col-sm-4 card" id="results-space"> 
+
+                <div class="card-body">
+                    <h5 class="card-title">Result</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">      
+                            <h6 class="card-subtitle text-muted" id="story-line"></h6>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">      
+                            <h6 class="card-subtitle text-muted" id="winner-line"></h6>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">      
+                            <button type="button" class="btn btn-secondary btn-sm btn-block" id="rematch">Rematch</button>   
+                        </li>
+                    </ul>  
+
+                </div>
+
+            </div>
+            
+            <div class="col-sm-4 card" id="play2-score">
+
+                <div class="card-body">
+                    <h5 class="card-title">Scores:</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">      
+                            <h6 class="card-subtitle text-muted">Wins:</h6>
+                            <span class="badge badge-success badge-pill" id="play2-win">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">      
+                            <h6 class="card-subtitle text-muted">Losses:</h6>
+                            <span class="badge badge-danger badge-pill" id="play2-loss">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">      
+                            <h6 class="card-subtitle text-muted">Ties:</h6>
+                            <span class="badge badge-secondary badge-pill" id="play2-tie">0</span>
+                        </li>
+                    </ul>
+
                 </div>
 
             </div>
@@ -112,7 +191,7 @@
                     <form id="IM">
                         <label for="button-input">Send a Message</label>
                         <input type="text" id="button-input">
-                        <input class="btn btn-secondary" id="add-msg" type="submit" value="sendIM">
+                        <input class="btn btn-secondary" id="add-msg" type="submit" value="send">
                     </form>
                 </div>
                 <div class="card-body">
@@ -135,11 +214,6 @@
         </section>
 
     </div>
-
-    
-
-
-
    
     <!-- Insert External Scripting -->
     <script type="text/javascript" src="./assets/javascript/rpsgame.js"></script>
