@@ -55,7 +55,7 @@ function checkTimeStamp(snap) {
     
         // console.log('Difference is ', cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes');
         // testing for greater than 1 but will make it greater than 5 when it works
-        if (parseInt(cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes') >  5) {
+        if (parseInt(cnvtCurrDT.diff(cnvtUpDT, 'minutes'), 'minutes') >  1) {
             // clear entries to start a new game
             dataRPS.child("play1Name").remove();
             dataRPS.child("play2Name").remove();
@@ -68,6 +68,9 @@ function checkTimeStamp(snap) {
             dataRPS.child("play1Hand").remove();
             dataRPS.child("play2Hand").remove();
             dataRPS.child("rematchSelected").remove();
+
+            compMsg = "New Game Created with new player due to lack of activity!";
+            addNewMsg("BOT", compMsg);
 
             return false;
         }
@@ -327,7 +330,12 @@ dataRPS.on("value", function(snapshot) {
     // ties will be the same 
     $("#play1-tie").text(tie);
     $("#play2-tie").text(tie);
-     
+
+},
+// Handle the errors
+    function(errorObject) {
+    console.log("Errors handled: " + errorObject.code);
+
 });
 // --------------------------------------------------------------------------------------
 //  end of firebase event listener
@@ -393,6 +401,11 @@ dataRPS.on("child_added", function(snapshot) {
         playGame();
 
     };
+
+},
+// Handle the errors
+    function(errorObject) {
+    console.log("Errors handled: " + errorObject.code);
 
 });
 // --------------------------------------------------------------------------------------
