@@ -107,8 +107,11 @@ $("#sub-button").on("click", function() {
         } 
         //  record doesn't exist so this will be player 1 
         else { 
+            // delete any leftover messages in the queue!
+            deleteMsgs();
             
             // add the new name to player 1 in the DB
+            // need to pause to allow the asynchronous 
             addPlay(1);
             // set the player as ready to play or chat
             playerReady = true;
@@ -829,6 +832,38 @@ function addNewMsg(tag, msg) {
 };
 // --------------------------------------------------------------------------------------
 //  end of addNewMsg() function
+// --------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------
+//  function to delete any prior messages at the start of a new game
+// --------------------------------------------------------------------------------------
+function deleteMsgs() {
+
+    // do we have a record in the DB yet?
+    dataMSG.once('value', function(snapshot) {
+
+        var exists = (snapshot.val() !== null) 
+
+        // Are there messages to delete?
+        if (exists) {
+            
+            // set the messages into an Object variable 
+            var obj =  JSON.parse(JSON.stringify(snapshot));
+            // create an array of the keys of the resulting messages object
+            var keys = Object.keys(obj);
+
+            for (i=0; i < keys.length; i++) {
+                
+                dataMSG.child(keys[i]).remove();
+            };
+            
+        };
+
+    });
+
+};
+// --------------------------------------------------------------------------------------
+//  end of deleteMsgs() function
 // --------------------------------------------------------------------------------------
 
 // --------------------------------------------------------------------------------------
