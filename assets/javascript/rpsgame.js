@@ -232,108 +232,109 @@ dataRPS.on("value", function(snapshot) {
     if (exists) {
         play1Name = updatePlayName(snapshot.val().play1Name, 1);
         play2Name = updatePlayName(snapshot.val().play2Name, 2); 
-    };
 
-    // Check which player this device is associated with
-    if (plyrName === play1Name) {
+        // Check which player this device is associated with
+        if (plyrName === play1Name) {
 
-        // current player is #1 but hasn't made a selection
-        if (!isPlay1ChoiceMade) {
+            // current player is #1 but hasn't made a selection
+            if (!isPlay1ChoiceMade) {
+
+                // hide the play2 section of choices
+                $("#play2-game-choice").hide();
+                // show the play1 section of choices
+                $("#play1-game-choice").show();
+                // set booleans for the local player
+                isPlay1 = true;
+                isPlay2 = false;
+                
+                // hide the rematch button
+                $("#rematch").hide();
+
+                // hide the previous results
+                $("#story-line").hide();
+                $("#winner-line").hide();
+
+            };
+
+        } 
+        // current player is #2 
+        else if (plyrName === play2Name) {
+
+            // player 2 hasn't made a choice yet
+            if (!isPlay2ChoiceMade) {
+            
+                // hide the play1 section of choices
+                $("#play1-game-choice").hide();
+                // show the play2 section of choices
+                $("#play2-game-choice").show();
+                // set booleans for the local player
+                isPlay2 = true;
+                isPlay1 = false;
+
+                // hide the rematch button
+                $("#rematch").hide();
+        
+                // hide the previous results
+                $("#story-line").hide();
+                $("#winner-line").hide();
+            
+            };
+
+        } 
+        // this session is just a bystander 
+        else {
+
+            play1Name = updatePlayName(snapshot.val().play1Name, 1);
+            play2Name = updatePlayName(snapshot.val().play2Name, 2);
+
+            // hide the play1 section of choices
+            $("#play1-game-choice").hide();
 
             // hide the play2 section of choices
             $("#play2-game-choice").hide();
-            // show the play1 section of choices
-            $("#play1-game-choice").show();
-            // set booleans for the local player
-            isPlay1 = true;
-            isPlay2 = false;
-            
-            // hide the rematch button
-            $("#rematch").hide();
 
-            // hide the previous results
-            $("#story-line").hide();
-            $("#winner-line").hide();
-
-        };
-
-    } 
-    // current player is #2 
-    else if (plyrName === play2Name) {
-
-        // player 2 hasn't made a choice yet
-        if (!isPlay2ChoiceMade) {
-        
-            // hide the play1 section of choices
-            $("#play1-game-choice").hide();
-            // show the play2 section of choices
-            $("#play2-game-choice").show();
-            // set booleans for the local player
-            isPlay2 = true;
+            // set booleans for the players
             isPlay1 = false;
+            isPlay2 = false;
 
             // hide the rematch button
             $("#rematch").hide();
-    
-            // hide the previous results
-            $("#story-line").hide();
-            $("#winner-line").hide();
+
+            if (!snapshot.val().rematchSelected) {
+                // hide the previous results
+                $("#story-line").show();
+                $("#winner-line").show();
+            } else {
+                // hide the previous results
+                $("#story-line").hide();
+                $("#winner-line").hide();
+            };
+        };
+
+        if (dataRPS.child("win"))  {
+            win = snapshot.val().win;
+        };
+        // player 1 Score is being held in the variables
+        $("#play1-win").text(win);
+        // player 2 Score is the opposite of player 1 score
+        $("#play2-loss").text(win); 
         
+        if (dataRPS.child("loss")) {
+            loss = snapshot.val().loss; 
         };
-
-    } 
-    // this session is just a bystander 
-    else {
-
-        play1Name = updatePlayName(snapshot.val().play1Name, 1);
-        play2Name = updatePlayName(snapshot.val().play2Name, 2);
-
-        // hide the play1 section of choices
-        $("#play1-game-choice").hide();
-
-        // hide the play2 section of choices
-        $("#play2-game-choice").hide();
-
-        // set booleans for the players
-        isPlay1 = false;
-        isPlay2 = false;
-
-        // hide the rematch button
-        $("#rematch").hide();
-
-        if (!snapshot.val().rematchSelected) {
-            // hide the previous results
-            $("#story-line").show();
-            $("#winner-line").show();
-        } else {
-            // hide the previous results
-            $("#story-line").hide();
-            $("#winner-line").hide();
+        // player 1 Score is being held in the variables
+        $("#play2-win").text(loss);
+        // player 2 Score is the opposite of player 1 score
+        $("#play1-loss").text(loss);
+        
+        if (dataRPS.child("tie")) {
+            tie = snapshot.val().tie; 
         };
+        // ties will be the same 
+        $("#play1-tie").text(tie);
+        $("#play2-tie").text(tie);
+
     };
- 
-    if (dataRPS.child("win") !== null) {
-        win = snapshot.val().win;
-    };
-    // player 1 Score is being held in the variables
-    $("#play1-win").text(win);
-    // player 2 Score is the opposite of player 1 score
-    $("#play2-loss").text(win); 
-    
-    if (dataRPS.child("loss")) {
-        loss = snapshot.val().loss; 
-    };
-    // player 1 Score is being held in the variables
-    $("#play2-win").text(loss);
-    // player 2 Score is the opposite of player 1 score
-    $("#play1-loss").text(loss);
-    
-    if (dataRPS.child("tie")) {
-        tie = snapshot.val().tie; 
-    };
-    // ties will be the same 
-    $("#play1-tie").text(tie);
-    $("#play2-tie").text(tie);
 
 },
 // Handle the errors
