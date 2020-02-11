@@ -65,21 +65,43 @@ $("#sub-button").on("click", function() {
 
             // see if there is an entry or the default for player 2
             if (snapshot.val().play2Name === "") {
-                
-                // add the new name to player 2 in the DB
-                addPlay(2);
-                // set the player as ready to play or chat
-                playerReady = true;
+
+                // verify that the plyrName has not yet been selected
+                if (plyrName === snapshot.val().play1Name) {
+                    // Need to select a different name 
+                    // add message that game is full 
+                    compMsg = (plyrName + " is already in use for the game.  Pick a different name.");
+                    addNewMsg("BOT", compMsg);
+
+                } else {
+                    
+                    // add the new name to player 2 in the DB
+                    addPlay(2);
+                    // set the player as ready to play or chat
+                    playerReady = true;
+
+                };
 
             } 
             //  already an entry in player 2 so game is full
             else {
-                
-                // add message that game is full 
-                compMsg = "Game is Full "  + plyrName + ". But you can still chat!";
-                addNewMsg("BOT", compMsg);
-                // allow user to monitor game play and message in the chat
-                playerReady = true; 
+
+                // verify that the plyrName has not yet been selected
+                if (plyrName === snapshot.val().play1Name || plyrName === snapshot.val().play2Name ) {
+                    
+                    // Need to select a different name 
+                    compMsg = (plyrName + " is already in use for the game.  Pick a different name.");
+                    addNewMsg("BOT", compMsg);
+
+                } else {
+                                  
+                    // add message that game is full 
+                    compMsg = "Game is Full "  + plyrName + ". But you can still chat!";
+                    addNewMsg("BOT", compMsg);
+                    // allow user to monitor game play and message in the chat
+                    playerReady = true; 
+
+                };
 
             };
         } 
@@ -96,11 +118,14 @@ $("#sub-button").on("click", function() {
     // Clear Information from the form
     $("#name-input").val('');
 
-    // hide the startup inputs
-    $("#startup").hide();
+    if (playerReady) {
 
-    // show the player section
-    $("#playerSection").show();
+        // hide the startup inputs
+        $("#startup").hide();
+
+        // show the player section
+        $("#playerSection").show();
+    };
 
 });
 // --------------------------------------------------------------------------------------
@@ -432,12 +457,13 @@ function checkTimeStamp(snap) {
                 win: win,
                 loss: loss,
                 tie: tie,
+                rematchSelected: true;
             });
 
             dataRPS.child("play1Played").remove();
             dataRPS.child("play2Played").remove();
             
-            dataRPS.child("rematchSelected").remove();
+            // dataRPS.child("rematchSelected").remove();
 
             // returning false allows processing to continue for player 1
             return false;
