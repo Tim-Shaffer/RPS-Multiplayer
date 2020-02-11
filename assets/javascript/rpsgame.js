@@ -25,7 +25,7 @@ var playerReady = false;
 
 //  global variables for specific player information
 var play1Name, play2Name;
-var play1Hand, play2Hand;
+var play1Played, play2Played;
 var isPlay1 = false;
 var isPlay2 = false;
 var isPlay1ChoiceMade = false;
@@ -129,9 +129,9 @@ $('.list-group-item').on('click', '.hand', function () {
             hand = 'Scissor';
         };
 
-        // update DB with play1Hand 
+        // update DB with play1Played 
         dataRPS.update({
-            play1Hand: hand,
+            play1Played: hand,
         });
 
         // hide the section because a choice was already made and processed
@@ -151,9 +151,9 @@ $('.list-group-item').on('click', '.hand', function () {
         else if ($(this).attr('id') === 'scissor') {
             hand = 'Scissor';
         };
-        // update DB with play2Hand
+        // update DB with play2Played
         dataRPS.update({
-            play2Hand: hand,
+            play2Played: hand,
         });
 
         // hide the section because a choice was already made and processed
@@ -162,6 +162,7 @@ $('.list-group-item').on('click', '.hand', function () {
 
     // remove the "rematchSelected" field from the DB to note players are making selections on the game
     dataRPS.child("rematchSelected").remove();
+
     
 });
 // --------------------------------------------------------------------------------------
@@ -174,10 +175,10 @@ $('.list-group-item').on('click', '.hand', function () {
 $("#rematch").on("click", function() {
     
     // remove player 1 selection from the DB
-    dataRPS.child("play1Hand").remove();
+    dataRPS.child("play1Played").remove();
 
     // remove player 2 selection from the DB
-    dataRPS.child("play2Hand").remove();
+    dataRPS.child("play2Played").remove();
 
     //  set DB for a rematch
     setRematch();
@@ -195,7 +196,6 @@ $("#rematch").on("click", function() {
 //  firebase event listener to be triggerred on the 'value' updates of the /rps folder
 // --------------------------------------------------------------------------------------
 dataRPS.on("value", function(snapshot) {
-    console.log("Executing based on the VALUE listener")
 
     // verify that there is an actual snapshot to be able to get values from
     var exists = (snapshot.val() !== null);
@@ -223,6 +223,10 @@ dataRPS.on("value", function(snapshot) {
             // hide the rematch button
             $("#rematch").hide();
 
+            // hide the previous results
+            $("#story-line").hide();
+            $("#winner-line").hide();
+
         };
 
     } 
@@ -242,6 +246,10 @@ dataRPS.on("value", function(snapshot) {
 
             // hide the rematch button
             $("#rematch").hide();
+    
+            // hide the previous results
+            $("#story-line").hide();
+            $("#winner-line").hide();
         
         };
 
@@ -249,14 +257,14 @@ dataRPS.on("value", function(snapshot) {
     // this session is just a bystander 
     else {
 
+        play1Name = updatePlayName(snapshot.val().play1Name, 1);
+        play2Name = updatePlayName(snapshot.val().play2Name, 2);
+
         // hide the play1 section of choices
         $("#play1-game-choice").hide();
 
         // hide the play2 section of choices
         $("#play2-game-choice").hide();
-
-        play1Name = $("#play1-name").text();
-        play2Name = $("#play2-name").text();
 
         // set booleans for the players
         isPlay1 = false;
@@ -265,6 +273,15 @@ dataRPS.on("value", function(snapshot) {
         // hide the rematch button
         $("#rematch").hide();
 
+        if (!snapshot.val().rematchSelected) {
+            // hide the previous results
+            $("#story-line").show();
+            $("#winner-line").show();
+        } else {
+            // hide the previous results
+            $("#story-line").hide();
+            $("#winner-line").hide();
+        };
     };
  
     if (dataRPS.child("win") !== null) {
@@ -304,17 +321,21 @@ dataRPS.on("value", function(snapshot) {
 //  firebase event listener to be triggerred on the 'child_added' updates of the /rps folder
 // --------------------------------------------------------------------------------------
 dataRPS.on("child_added", function(snapshot) {
-    console.log("Executing based on the CHILD_ADDED listener")
+    // console.log("Child Added:  " + snapshot.key);
 
     // determine which child was added to proceed
-    if (snapshot.key === 'play1Hand') {
+    if (snapshot.key === 'play1Name' || snapshot.key === 'play2Name') {
+        play1Name = updatePlayName(snapshot.val().play1Name, 1);
+        play2Name = updatePlayName(snapshot.val().play2Name, 2);
+    } 
+    else if (snapshot.key === 'play1Played') {
         // update for player one selection
-        play1Hand = snapshot.val();
+        play1Played = snapshot.val();
         playChoice(1);
     }
-    else if (snapshot.key === 'play2Hand') {
+    else if (snapshot.key === 'play2Played') {
         // update for player two selection 
-        play2Hand = snapshot.val();
+        play2Played = snapshot.val();
         playChoice(2);
     } else if (snapshot.key === 'rematchSelected') {
         $("#rematch").hide();
@@ -323,14 +344,14 @@ dataRPS.on("child_added", function(snapshot) {
         $("#play1-hand").removeClass("btn-danger");
         $("#play1-hand").removeClass("btn-secondary")
         isPlay1ChoiceMade = false;
-        play1Hand = "";
+        play1Played = "";
 
         $("#play2-hand").text("Player 2 Hand");
         $("#play2-hand").removeClass("btn-success");
         $("#play2-hand").removeClass("btn-danger"); 
         $("#play2-hand").removeClass("btn-secondary")
         isPlay2ChoiceMade = false; 
-        play2Hand = "";
+        play2Played = "";
 
     }
     else if (snapshot.key === 'win') {  
@@ -355,13 +376,13 @@ dataRPS.on("child_added", function(snapshot) {
     };
 
     // decide the game when both players have selected their hands
-    if (play1Hand && play2Hand) {
+    if (play1Played && play2Played) {
         
         // function to determine the winner
         playGame();
 
     };
-
+        
 },
 // Handle the errors
     function(errorObject) {
@@ -390,13 +411,11 @@ function checkTimeStamp(snap) {
         var lastUpdDT = snap.val().updDT;
         // local variable to format the update date/time as unix for further comparison
         var cnvtUpDT = moment(lastUpdDT, unixFormat);
-        // console.log("last update timestamp:  " + cnvtUpDT.format("MM/DD/YY hh:mm:ss"));
     
         // local variable to hold the current time
         var currDT = moment().format(unixFormat);
         // local variable to format the current date/time as unix for further comparison
         var cnvtCurrDT = moment(currDT, unixFormat);
-        // console.log("current timestamp:  " + cnvtCurrDT.format("MM/DD/YY hh:mm:ss"));
     
         // testing for greater than 1 but will make it greater than 5 when it works
         // get the difference from the current date/time to the update date/time and use the Integer piece to see if it was more than 5 minutes
@@ -407,22 +426,18 @@ function checkTimeStamp(snap) {
             dataRPS.child("play2Name").remove();
             
             win = 0;
-            dataRPS.child("win").remove();
-            
             loss = 0;
-            dataRPS.child("loss").remove();
-            
             tie = 0;
-            dataRPS.child("tie").remove();
-            
-            dataRPS.child("play1Hand").remove();
-            dataRPS.child("play2Hand").remove();
+            dataRPS.update({
+                win: win,
+                loss: loss,
+                tie: tie,
+            });
+
+            dataRPS.child("play1Played").remove();
+            dataRPS.child("play2Played").remove();
             
             dataRPS.child("rematchSelected").remove();
-
-            // log a message that this player started a new game!
-            compMsg = "New Game Created with new player!";
-            addNewMsg("BOT", compMsg);
 
             // returning false allows processing to continue for player 1
             return false;
@@ -483,6 +498,7 @@ function addPlay(int=1) {
             updDT: firebase.database.ServerValue.TIMESTAMP,
         });   
 
+        // log player added message
         compMsg = "Added Player 2:  " + plyrName;
         addNewMsg("BOT", compMsg); 
 
@@ -500,7 +516,13 @@ function addPlay(int=1) {
             tie: 0,
             updDT: firebase.database.ServerValue.TIMESTAMP,
         });
-    
+        
+        
+        // log a message that this player started a new game!
+        compMsg = "New Game Created!";
+        addNewMsg("BOT", compMsg);
+
+        // log player added message
         compMsg = "Added Player 1:  " + plyrName;
         addNewMsg("BOT", compMsg); 
 
@@ -581,6 +603,7 @@ function setRematch() {
         updDT: firebase.database.ServerValue.TIMESTAMP,
     });
 
+    // ****
     // make the choices available for the active player of the current session
     if (isPlay1) {
         $("#play1-game-choice").show();
@@ -590,10 +613,6 @@ function setRematch() {
         $("#play2-game-choice").show();     
         
     };
-
-    // hide the previous results
-    $("#story-line").hide();
-    $("#winner-line").hide();
 
 };
 // --------------------------------------------------------------------------------------
@@ -608,21 +627,21 @@ function setRematch() {
 function playGame() {
 
     // show the hands selected
-    $("#play1-hand").text(play1Hand);
-    $("#play2-hand").text(play2Hand);
+    $("#play1-hand").text(play1Played);
+    $("#play2-hand").text(play2Played);
 
     // Check for ties first 
-    if (play1Hand === play2Hand) {
+    if (play1Played === play2Played) {
         
         $("#story-line").text(" ");
 
         processTie();
     } 
     // Player 1 chose Rock 
-    else if (play1Hand === "Rock") {
+    else if (play1Played === "Rock") {
     
         // Rock beats Scissors
-        if (play2Hand === "Scissor"){
+        if (play2Played === "Scissor"){
 
             $("#story-line").text("Rock Smashes Scissors");
 
@@ -639,9 +658,9 @@ function playGame() {
         }
     }
     // Player 1 chose Paper
-    else if (play1Hand === "Paper") {
+    else if (play1Played === "Paper") {
         // Paper beats Rock
-        if (play2Hand === "Rock"){
+        if (play2Played === "Rock"){
 
             $("#story-line").text("Paper Covers Rock");
 
@@ -657,9 +676,9 @@ function playGame() {
         }
     } 
     // Player 1 chose Scissors
-    else if (play1Hand === "Scissor") {
+    else if (play1Played === "Scissor") {
         // Scissors beat Paper
-        if (play2Hand === "Paper"){
+        if (play2Played === "Paper"){
     
             $("#story-line").text("Scissors Cut Paper");
             
@@ -694,14 +713,20 @@ function playGame() {
 // --------------------------------------------------------------------------------------
 function processTie() {
 
-    tie++;
+        $("#winner-line").text("It's a Tie!")
+        
+        // ***** trying to correct error when additional player arrives but hands were selected
+        if (isPlay1 || isPlay2) {
+            
+            tie++;
 
-    $("#winner-line").text("It's a Tie!")
+            // update DB with tie totals
+            dataRPS.update({
+                tie: tie,
 
-    // update DB with tie totals
-    dataRPS.update({
-        tie: tie,
-    });
+            });
+
+        };
 
 };
 // --------------------------------------------------------------------------------------
@@ -713,17 +738,23 @@ function processTie() {
 // --------------------------------------------------------------------------------------
 function processWin() {
 
-    win++;
-
     $("#play1-hand").addClass("btn-success");
     $("#play2-hand").addClass("btn-danger");
 
     $("#winner-line").text(play1Name + "  Wins!!")
-    
-    // update DB with win totals
-    dataRPS.update({
-        win: win,
-    });
+
+    // ***** trying to correct error when additional player arrives but hands were selected
+    if (isPlay1 || isPlay2) {
+        
+        win++;
+        
+        // update DB with win totals
+        dataRPS.update({
+            win: win,
+        });
+
+    };
+
 };
 // --------------------------------------------------------------------------------------
 //   end of processWin() function
@@ -734,17 +765,23 @@ function processWin() {
 // --------------------------------------------------------------------------------------
 function processLoss() {
 
-    loss++;
-
     $("#play2-hand").addClass("btn-success");
     $("#play1-hand").addClass("btn-danger");
 
     $("#winner-line").text(play2Name + "  Wins!!")
 
-    // update DB with loss totals
-    dataRPS.update({
-        loss: loss,
-    });
+    // ***** trying to correct error when additional player arrives but hands were selected
+    if (isPlay1 || isPlay2) {
+
+        loss++;
+
+        // update DB with loss totals
+        dataRPS.update({
+            loss: loss,
+        });
+
+    };
+
 };
 // --------------------------------------------------------------------------------------
 //   end of processLoss() function
