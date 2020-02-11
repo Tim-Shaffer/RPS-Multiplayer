@@ -457,7 +457,7 @@ function checkTimeStamp(snap) {
                 win: win,
                 loss: loss,
                 tie: tie,
-                rematchSelected: true;
+                rematchSelected: true,
             });
 
             dataRPS.child("play1Played").remove();
