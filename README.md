@@ -66,9 +66,10 @@ Multiplayer **Rock** - **Paper** - **Scissors** Game
 
 ![Image of Player 3 Page Screenshot](/assets/images/Player3_Watch_Screen.jpg)
 
-1. The **Messaging** section will show the last 10 messages.
+1. The **Messaging** section will be refreshed as each user enters to play or chat.
     1. Messages are tagged with either the User Name or "BOT" (computer) to identify who created the message.
     1. A timestamp is also created and displayed for when that message occurred.
+    1. Each users list of messages will only reflect messages from the point of time that user entered the game. 
     
 
     

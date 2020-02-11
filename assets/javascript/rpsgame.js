@@ -52,6 +52,9 @@ $("#sub-button").on("click", function() {
     // set the global plyrName variable equal to the Name that was entered
     plyrName = capital_letter($("#name-input").val().trim().toLowerCase());
 
+    // clear out any prior messages to start fresh 
+    $("#msg-table > tbody").empty();
+
     // do we have a record in the DB yet?
     dataRPS.once('value', function(snapshot) {
 
